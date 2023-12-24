@@ -11,7 +11,7 @@ public class Message extends Model implements Serializable {
 
     public Message() {}
 
-    public Message(Operation operation, Model body) {
+    public Message(Model body, Operation operation) {
         this.operation = operation;
         this.body = body;
     }
@@ -48,12 +48,36 @@ public class Message extends Model implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Message { op: ").append(operation.toString()).append(". ");
-        builder.append("body: ").append(body);
+        builder.append("op: ").append(operation.toString()).append(" . ");
+        builder.append("body: ").append(body).append(" . ");
         if(message != null){
-            builder.append(". message: ").append(message);
+            builder.append("message: ").append(message);
         }
-        builder.append(". }");
         return builder.toString();
+    }
+
+    @Override
+    public Model parseToModel(String message) {
+        Message model = new Message();
+        String[] parts = message.split(" . ");
+        for (String part : parts) {
+            String[] keyValue = part.split(": ");
+            if (keyValue.length == 2) {
+                String key = keyValue[0].trim();
+                String value = keyValue[1].trim();
+                switch (key) {
+                    case "op":
+                        model.setOperation(Operation.valueOf(value));
+                        break;
+                    case "body":
+                        model.setBody(body.parseToModel(value));
+                        break;
+                    case "message":
+                        model.setMessage(value);
+                        break;
+                }
+            }
+        }
+        return model;
     }
 }
