@@ -29,8 +29,7 @@ public class LoginRegisterModel extends Model {
     }
 
     @Override
-    public Model parseToModel(String message) {
-        LoginRegisterModel model = new LoginRegisterModel();
+    public void parseToModel(String message) {
         String[] parts = message.split(" .logreg. ");
         for (String part : parts) {
             String[] keyValue = part.split(":logreg: ");
@@ -39,14 +38,13 @@ public class LoginRegisterModel extends Model {
                 String value = keyValue[1].trim();
                 switch (key) {
                     case "username":
-                        model.setUsername(value);
+                        this.setUsername(value);
                         break;
                     case "password":
-                        model.setPassword(value);
+                        this.setPassword(value);
                         break;
                 }
             }
         }
-        return model;
     }
 }

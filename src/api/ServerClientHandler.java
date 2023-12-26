@@ -40,50 +40,30 @@ public class ServerClientHandler implements Runnable {
         try {
             // Handle client requests
             while (true) {
-                // Receive a response from the Client
-                Object receivedData = receiver.readObject();
+                //TODO: receive Header { 0: Encryption.None , 1:Encryption.AES }
+                byte[] typeEncryption = new byte[1];
+                int bytesRead = receiver.read(typeEncryption);
 
                 // Check if the client has disconnected
-                if (receivedData == null) {
+                if (bytesRead == -1) {
+                    // Client disconnected
                     System.out.println("Client disconnected: " + clientSocket.getInetAddress());
                     break;
                 }
 
-                if (receivedData instanceof Message) {
-                    // Receive request message
-                    Message request = (Message) receivedData;
+                // Receive a response from the Client
+                Object receivedData = receiver.readObject();
 
-                    // Process the received message
-                    Message response = handleClientRequests(request);
-
-                    // Send the response message
-                    sender.writeObject(response);
-                    sender.flush();
-
-                } else if (receivedData instanceof String) {
-                    String request = (String) receivedData;
-
-                    // Check Secret Key
-                    if (symmetricKey == null) {
-                        symmetricKey = AES.generateSecretKey("data");
-                    }
-
-                    // decrypt request
-                    Message decryptRequest = AES.decryptMessage(request, symmetricKey);
-
-                    // handle Response Message
-                    Message responseMessage = handleClientRequests(decryptRequest);
-
-                    // encrypt response
-                    String response = AES.encryptMessage(responseMessage, symmetricKey);
-
-                    System.out.println("message after encryption: " + response);
-                    // Send the response byte array
-                    sender.writeObject(response);
-                    sender.flush();
+                //TODO: add case if there new Encryption Type
+                switch (typeEncryption[0]){
+                    case 0:
+                        receiveNormalMessage(receivedData);
+                        break;
+                    case 1:
+                        receiveSymmetricEncryptionMessage(receivedData);
+                        break;
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -97,6 +77,41 @@ public class ServerClientHandler implements Runnable {
                 ioException.printStackTrace();
             }
         }
+    }
+
+    private void receiveNormalMessage(Object receivedData) throws IOException {
+        // Receive request message
+        Message request = (Message) receivedData;
+
+        // Process the received message
+        Message response = handleClientRequests(request);
+
+        // Send the response message
+        sender.writeObject(response);
+        sender.flush();
+    }
+
+    private void receiveSymmetricEncryptionMessage(Object receivedData) throws Exception {
+        String request = (String) receivedData;
+
+        // Check Secret Key
+        if (symmetricKey == null) {
+            symmetricKey = AES.generateSecretKey("data");
+        }
+
+        // decrypt request
+        Message decryptRequest = AES.decryptMessage(request, symmetricKey);
+
+        // handle Response Message
+        Message responseMessage = handleClientRequests(decryptRequest);
+
+        // encrypt response
+        String response = AES.encryptMessage(responseMessage, symmetricKey);
+
+        System.out.println("message after encryption: " + response);
+        // Send the response byte array
+        sender.writeObject(response);
+        sender.flush();
     }
 
     private Message handleClientRequests(Message request) {

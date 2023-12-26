@@ -54,7 +54,7 @@ public class ConnectView {
                 LoginRegisterModel body = new LoginRegisterModel("waseem", "pass");
                 Message request = new Message(body, Operation.Login);
                 // Send Message
-                Message response = clientSocket.sendMessageToServer(request, Encryption.AES);
+                Message response = clientSocket.sendMessageToServer(request, Encryption.None);
                 //Print Server Response
                 System.out.println("Server: " + response);
             } catch (Exception e) {

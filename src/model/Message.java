@@ -71,8 +71,7 @@ public class Message extends Model implements Serializable {
     }
 
     @Override
-    public Model parseToModel(String message) {
-        Message model = new Message();
+    public void parseToModel(String message) {
         String[] parts = message.split(" .message. ");
         for (String part : parts) {
             String[] keyValue = part.split(":message: ");
@@ -81,18 +80,17 @@ public class Message extends Model implements Serializable {
                 String value = keyValue[1].trim();
                 switch (key) {
                     case "op":
-                        model.setOperation(Operation.valueOf(value));
+                        this.setOperation(Operation.valueOf(value));
                         break;
                     case "body":
-                        model.setBody(detectModel(model.operation, value));
+                        this.setBody(detectModel(this.operation, value));
                         break;
                     case "message":
-                        model.setMessage(value);
+                        this.setMessage(value);
                         break;
                 }
             }
         }
-        return model;
     }
 
     Model detectModel(Operation operation, String data) {
@@ -100,7 +98,9 @@ public class Message extends Model implements Serializable {
         switch (operation){
             case Login:
             case SignUp:
-                return new LoginRegisterModel().parseToModel(data);
+                LoginRegisterModel model = new LoginRegisterModel();
+                model.parseToModel(data);
+                return model;
             default:
                 return null;
         }

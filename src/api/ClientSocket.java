@@ -40,13 +40,18 @@ public class ClientSocket {
         }
     }
 
-    private Message sendNormalMessage(Message message) throws CustomException {
+    private Message sendNormalMessage(Message request) throws CustomException {
         if (sender == null) {
             throw new CustomException("Not connected to the server");
         }
         try {
+            // Send the header indicating an object
+            // determine Encryption Type is Normal
+            sender.writeByte(0);
+            sender.flush();
+
             // Send Message Object
-            sender.writeObject(message);
+            sender.writeObject(request);
             sender.flush();
 
             // Wait for the server response
@@ -66,19 +71,17 @@ public class ClientSocket {
         try {
             // Generate Secret Key
             if (symmetricKey == null) {
-                if (request.getOperation() == Operation.SetUserInfo){
-                    //TODO: change data String and delete else
-                    symmetricKey = AES.generateSecretKey("info data");
-                } else {
-                    symmetricKey = AES.generateSecretKey("data");
-                }
+                symmetricKey = AES.generateSecretKey("data");
             }
 
-            System.out.println("message before encrypt: " + request);
             // encrypt Message
             String messageEncrypt = AES.encryptMessage(request, symmetricKey);
 
-            System.out.println("message encrypt before send: " + messageEncrypt);
+            // Send the header indicating an object
+            // determine Encryption Type is AES
+            sender.writeByte(1);
+            sender.flush();
+
             // Send request Message:
             sender.writeObject(messageEncrypt);
             sender.flush();

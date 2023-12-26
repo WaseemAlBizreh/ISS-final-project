@@ -41,7 +41,7 @@ public class AES {
 
             // Convert the Decrypt text back to Message Object By ParseToModel
             Message message = new Message();
-            message = (Message) message.parseToModel(decryptedMessage);
+            message.parseToModel(decryptedMessage);
             return message;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
                 IllegalBlockSizeException | BadPaddingException e) {
