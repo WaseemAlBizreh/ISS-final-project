@@ -2,7 +2,9 @@ package api;
 
 import exception.CustomException;
 import model.Message;
+import security.AES;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,6 +14,7 @@ public class ClientSocket {
     private Socket socket;
     private ObjectOutputStream sender;
     private ObjectInputStream receiver;
+    private static SecretKey symmetricKey;
 
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
         // Establish a socket connection to the server
@@ -28,11 +31,21 @@ public class ClientSocket {
         return true;
     }
 
-    public Message sendMessageToServer(Message message) throws CustomException {
+    public Message sendMessageToServer(Message message, Encryption encryption) throws CustomException {
+        //TODO: add elseif (encryption == Encryption.TYPE) when new encryption type added
+        if (encryption == Encryption.AES) {
+            return sendEncryptMessage(message);
+        } else {
+            return sendNormalMessage(message);
+        }
+    }
+
+    private Message sendNormalMessage(Message message) throws CustomException {
         if (sender == null) {
             throw new CustomException("Not connected to the server");
         }
         try {
+            // Send Message Object
             sender.writeObject(message);
             sender.flush();
 
@@ -43,6 +56,42 @@ public class ClientSocket {
             Message newMessage = new Message();
             newMessage.setMessage("Error reading server response");
             return newMessage;
+        }
+    }
+
+    private Message sendEncryptMessage(Message request) throws CustomException {
+        if (sender == null) {
+            throw new CustomException("Not connected to the server");
+        }
+        try {
+            // Generate Secret Key
+            if (symmetricKey == null) {
+                if (request.getOperation() == Operation.SetUserInfo){
+                    //TODO: change data String and delete else
+                    symmetricKey = AES.generateSecretKey("info data");
+                } else {
+                    symmetricKey = AES.generateSecretKey("data");
+                }
+            }
+
+            System.out.println("message before encrypt: " + request);
+            // encrypt Message
+            String messageEncrypt = AES.encryptMessage(request, symmetricKey);
+
+            System.out.println("message encrypt before send: " + messageEncrypt);
+            // Send request Message:
+            sender.writeObject(messageEncrypt);
+            sender.flush();
+
+            // Receive response Message
+            // Wait for the server response
+            String responseString = (String) receiver.readObject();
+
+            // decrypt Message
+            return AES.decryptMessage(responseString, symmetricKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

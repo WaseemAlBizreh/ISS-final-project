@@ -1,7 +1,9 @@
 package api;
 
 import model.Message;
+import security.AES;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,6 +16,7 @@ public class ServerClientHandler implements Runnable {
     private final Socket clientSocket;
     private final ObjectOutputStream sender;
     private final ObjectInputStream receiver;
+    private static SecretKey symmetricKey;
 
     public ServerClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -37,22 +40,51 @@ public class ServerClientHandler implements Runnable {
         try {
             // Handle client requests
             while (true) {
-                // Read a message from the client
-                Message request = (Message) receiver.readObject();
+                // Receive a response from the Client
+                Object receivedData = receiver.readObject();
 
-                // Check if the message is not null (indicating that the client has disconnected)
-                if (request == null) {
+                // Check if the client has disconnected
+                if (receivedData == null) {
                     System.out.println("Client disconnected: " + clientSocket.getInetAddress());
                     break;
                 }
 
-                System.out.println("\nClient: " + request);
+                if (receivedData instanceof Message) {
+                    // Receive request message
+                    Message request = (Message) receivedData;
 
-                // Process the received message or send a response if needed
-                Message response = handleClientRequests(request);
-                sender.writeObject(response);
+                    // Process the received message
+                    Message response = handleClientRequests(request);
+
+                    // Send the response message
+                    sender.writeObject(response);
+                    sender.flush();
+
+                } else if (receivedData instanceof String) {
+                    String request = (String) receivedData;
+
+                    // Check Secret Key
+                    if (symmetricKey == null) {
+                        symmetricKey = AES.generateSecretKey("data");
+                    }
+
+                    // decrypt request
+                    Message decryptRequest = AES.decryptMessage(request, symmetricKey);
+
+                    // handle Response Message
+                    Message responseMessage = handleClientRequests(decryptRequest);
+
+                    // encrypt response
+                    String response = AES.encryptMessage(responseMessage, symmetricKey);
+
+                    System.out.println("message after encryption: " + response);
+                    // Send the response byte array
+                    sender.writeObject(response);
+                    sender.flush();
+                }
             }
-        } catch (IOException | ClassNotFoundException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             // Remove this client handler from the list
@@ -73,10 +105,16 @@ public class ServerClientHandler implements Runnable {
                 return new Message("None", Operation.None);
             case Login:
                 //TODO: write login function Here
+                //retrun controller.login(request)
                 return new Message("Login", Operation.Login);
             case SignUp:
                 //TODO: write SignUp function Here
+                //retrun controller.signUp(request)
                 return new Message("SignUp", Operation.SignUp);
+            case SetUserInfo:
+                //TODO: write SetUserInfo Here, and set info data
+                symmetricKey = AES.generateSecretKey("Info data");
+                return new Message("SetUserInfo", Operation.SetUserInfo);
             default:
                 return new Message("Determine Operation Type Please", Operation.None);
         }

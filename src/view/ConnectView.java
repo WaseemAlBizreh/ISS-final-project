@@ -1,8 +1,9 @@
 package view;
 
 import api.ClientSocket;
+import api.Encryption;
 import api.Operation;
-import exception.CustomException;
+import model.LoginRegisterModel;
 import model.Message;
 
 import javax.swing.*;
@@ -50,12 +51,14 @@ public class ConnectView {
 
             //Send Test Message
             try {
-
-                Message request = new Message("Hello", Operation.None);
-                Message response = clientSocket.sendMessageToServer(request);
+                LoginRegisterModel body = new LoginRegisterModel("waseem", "pass");
+                Message request = new Message(body, Operation.Login);
+                // Send Message
+                Message response = clientSocket.sendMessageToServer(request, Encryption.AES);
+                //Print Server Response
                 System.out.println("Server: " + response);
-
-            } catch (CustomException e) {
+            } catch (Exception e) {
+                e.printStackTrace();
                 JOptionPane.showMessageDialog(frame, e.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
             }

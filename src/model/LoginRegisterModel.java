@@ -23,17 +23,17 @@ public class LoginRegisterModel extends Model {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("username: ").append(username).append(" . ");
-        builder.append("password: ").append(password);
+        builder.append("username:logreg: ").append(username).append(" .logreg. ");
+        builder.append("password:logreg: ").append(password);
         return builder.toString();
     }
 
     @Override
     public Model parseToModel(String message) {
         LoginRegisterModel model = new LoginRegisterModel();
-        String[] parts = message.split(" . ");
+        String[] parts = message.split(" .logreg. ");
         for (String part : parts) {
-            String[] keyValue = part.split(": ");
+            String[] keyValue = part.split(":logreg: ");
             if (keyValue.length == 2) {
                 String key = keyValue[0].trim();
                 String value = keyValue[1].trim();
