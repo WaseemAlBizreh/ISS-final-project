@@ -23,6 +23,7 @@ public class ConnectView {
     }
 
     private void connectToServer() {
+
         String serverIP = serverIPField.getText();
         String serverPortText = serverPortField.getText();
 
@@ -42,13 +43,16 @@ public class ConnectView {
             if (connect) {
                 JOptionPane.showMessageDialog(frame, "You Connect with Server Successfully.",
                         "Connect Successfully", JOptionPane.INFORMATION_MESSAGE);
-            }
 
+
+            }
+         //   RegistrationForm m = new RegistrationForm(clientSocket);
+            Register_loginView f = new Register_loginView(clientSocket);
+            frame.dispose();
             // You can perform other actions after successful connection, such as showing the next screen
             //TODO: Navigate To Next Screen
             //TODO: Write Code Here
 
-            //Send Test Message
             try {
 
                 Message request = new Message("Hello", Operation.None);
@@ -68,6 +72,7 @@ public class ConnectView {
     }
 
     private void buildScreen() {
+     //   Register_loginView f = new Register_loginView(clientSocket);
         frame = new JFrame("Connect View");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(350, 200);
@@ -90,7 +95,9 @@ public class ConnectView {
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                connectToServer();
+
+
+             connectToServer();
             }
         });
 
