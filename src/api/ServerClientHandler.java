@@ -1,16 +1,26 @@
 package api;
 
+import app.Utils;
+import model.Message;
+import security.AES;
+import security.GenerateKeys;
+import security.JavaPGP;
 import controller.ServerAddProjectOrMarks;
 import controller.ServerRegistration;
 import controller.Server_login_registerController;
 import exception.CustomException;
 import model.*;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +29,8 @@ public class ServerClientHandler implements Runnable {
     private final Socket clientSocket;
     private final ObjectOutputStream sender;
     private final ObjectInputStream receiver;
+    private static SecretKey symmetricKey;
+    public PublicKey clientKey;
 
     public ServerClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -39,23 +51,45 @@ public class ServerClientHandler implements Runnable {
 
     @Override
     public void run() {
+        //hand shaking
+            Utils utils=new Utils();
+            KeyPair keyPair= utils.servercheckpgp();
+            try {
+                clientKey=(PublicKey) receiver.readObject();
+                sender.writeObject(keyPair.getPublic());
+                sender.flush();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
         try {
+            //handshaking
+
             // Handle client requests
             while (true) {
-                // Read a message from the client
-                Message request = (Message) receiver.readObject();
+                //TODO: receive Header { 0: Encryption.None , 1:Encryption.AES }
+                byte[] typeEncryption = new byte[1];
+                int bytesRead = receiver.read(typeEncryption);
 
-                // Check if the message is not null (indicating that the client has disconnected)
-                if (request == null) {
+                // Check if the client has disconnected
+                if (bytesRead == -1) {
+                    // Client disconnected
                     System.out.println("Client disconnected: " + clientSocket.getInetAddress());
                     break;
                 }
 
-                System.out.println("\nClient: " + request);
+                // Receive a response from the Client
+                Object receivedData = receiver.readObject();
 
-                // Process the received message or send a response if needed
-                Message response = handleClientRequests(request);
-                sender.writeObject(response);
+                //TODO: add case if there new Encryption Type
+                switch (typeEncryption[0]){
+                    case 0:
+                        receiveNormalMessage(receivedData);
+                        break;
+                    case 1:
+                        receiveSymmetricEncryptionMessage(receivedData);
+                        break;
+                }
             }
         } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | CustomException e) {
             e.printStackTrace();
@@ -71,13 +105,48 @@ public class ServerClientHandler implements Runnable {
             }
         }
     }
+
+    private void receiveNormalMessage(Object receivedData) throws IOException {
+        // Receive request message
+        Message request = (Message) receivedData;
+
+        // Process the received message
+        Message response = handleClientRequests(request);
+
+        // Send the response message
+        sender.writeObject(response);
+        sender.flush();
+    }
+
+    private void receiveSymmetricEncryptionMessage(Object receivedData) throws Exception {
+        String request = (String) receivedData;
+
+        // Check Secret Key
+        if (symmetricKey == null) {
+            symmetricKey = AES.generateSecretKey("data");
+        }
+
+        // decrypt request
+        Message decryptRequest = AES.decryptMessage(request, symmetricKey);
+
+        // handle Response Message
+        Message responseMessage = handleClientRequests(decryptRequest);
+
+        // encrypt response
+        String response = AES.encryptMessage(responseMessage, symmetricKey);
+
+        System.out.println("message after encryption: " + response);
+        // Send the response byte array
+        sender.writeObject(response);
+        sender.flush();
+    }
     Server_login_registerController m = new Server_login_registerController();
     ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
     ServerRegistration register = new ServerRegistration();
-    private Message handleClientRequests(Message request) throws NoSuchAlgorithmException, CustomException {
+
+    private Message handleClientRequests(Message request) {
         switch (request.getOperation()) {
             case None:
-
                 return new Message("None", Operation.None);
             case Login:
 
@@ -113,9 +182,13 @@ public class ServerClientHandler implements Runnable {
             case Register:
                 RegistrationModel reg = (RegistrationModel) request.getBody();
                 RegistrationModel m =  register.Registration(reg);
+                symmetricKey = AES.generateSecretKey("Info data");
 
                 //TODO: write Register function Here
                 return new Message(m, Operation.Register);
+
+            case SessionKey:
+                //return controller.SessionKey()
             default:
                 return new Message("Determine Operation Type Please", Operation.None);
         }
