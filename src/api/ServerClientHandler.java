@@ -149,6 +149,7 @@ public class ServerClientHandler implements Runnable {
             case Login:
 
                 LoginRegisterModel log = (LoginRegisterModel) request.getBody();
+                symmetricKey = AES.generateSecretKey(log.password);
                 RegistrationModel r=  m.login(log.username,log.password);
 
                 //TODO: write login function Here
@@ -158,6 +159,7 @@ public class ServerClientHandler implements Runnable {
             case SignUp:
                 //TODO: write SignUp function Here
                 LoginRegisterModel e = (LoginRegisterModel) request.getBody();
+               symmetricKey = AES.generateSecretKey(e.password);
               int y=  m.register(e.username,e.password);
                 String id = Integer.toString(y);
                 return new Message(id, Operation.SignUp);
@@ -179,8 +181,9 @@ public class ServerClientHandler implements Runnable {
 
             case Register:
                 RegistrationModel reg = (RegistrationModel) request.getBody();
+                symmetricKey = AES.generateSecretKey(reg.nationalNumber);
                 RegistrationModel m =  register.Registration(reg);
-                symmetricKey = AES.generateSecretKey("Info data");
+
 
                 //TODO: write Register function Here
                 return new Message(m, Operation.Register);

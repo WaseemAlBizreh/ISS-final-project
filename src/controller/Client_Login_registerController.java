@@ -1,10 +1,12 @@
 package controller;
 
 import api.ClientSocket;
+import api.Encryption;
 import api.Operation;
 import exception.CustomException;
 import model.LoginRegisterModel;
 import model.*;
+import security.AES;
 
 import javax.swing.*;
 
@@ -24,13 +26,14 @@ String d;
         LoginRegisterModel  model = new LoginRegisterModel(username,password );
 
       Message request = new Message( model ,Operation.Login);
-
+        ClientSocket.symmetricKey = AES.generateSecretKey(model.password);
      // Message response = clientSocket.sendMessageToServer(request);
 
-        Message response = clientSocket.sendMessageToServer(request);
+        Message response = clientSocket.sendMessageToServer(request, Encryption.None);
         RegistrationModel resp= (RegistrationModel) response.getBody();
         return resp;
      // System.out.println("Server: " + response);
+
 
     }
 
@@ -44,7 +47,9 @@ String d;
         try {
 
             Message request = new Message(model, Operation.SignUp);
-            Message response = clientSocket.sendMessageToServer(request);
+            ClientSocket.symmetricKey = AES.generateSecretKey(model.password);
+            Message response = clientSocket.sendMessageToServer(request, Encryption.None);
+
             System.out.println("Server: " + response);
             //response.getMessage();
             int id = Integer.parseInt(response.getMessage());

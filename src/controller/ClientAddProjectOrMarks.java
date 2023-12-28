@@ -1,6 +1,7 @@
 package controller;
 
 import api.ClientSocket;
+import api.Encryption;
 import api.Operation;
 import exception.CustomException;
 import model.Message;
@@ -18,7 +19,7 @@ public class ClientAddProjectOrMarks {
 
         Message request = new Message( model , Operation.Project);
 
-        Message response = clientSocket.sendMessageToServer(request);
+        Message response = clientSocket.sendMessageToServer(request, Encryption.None);
         int id = Integer.parseInt(response.getMessage());
         return id;
         // System.out.println("Server: " + response);
@@ -28,7 +29,7 @@ public class ClientAddProjectOrMarks {
 
         Message request = new Message( model , Operation.Marks);
 
-        Message response = clientSocket.sendMessageToServer(request);
+        Message response = clientSocket.sendMessageToServer(request, Encryption.None);
         int id = Integer.parseInt(response.getMessage());
         return id;
         // System.out.println("Server: " + response);

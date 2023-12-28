@@ -17,7 +17,7 @@ public class ClientSocket {
     private Socket socket;
     private ObjectOutputStream sender;
     private ObjectInputStream receiver;
-    private static SecretKey symmetricKey;
+    public static SecretKey symmetricKey;
     public PublicKey serverKey;
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
         // Establish a socket connection to the server
