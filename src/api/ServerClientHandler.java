@@ -130,6 +130,8 @@ public class ServerClientHandler implements Runnable {
                 //TODO: write SetUserInfo Here, and set info data
                 symmetricKey = AES.generateSecretKey("Info data");
                 return new Message("SetUserInfo", Operation.SetUserInfo);
+            case SessionKey:
+                //return controller.SessionKey()
             default:
                 return new Message("Determine Operation Type Please", Operation.None);
         }

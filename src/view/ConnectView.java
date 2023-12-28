@@ -26,7 +26,6 @@ public class ConnectView {
     private void connectToServer() {
         String serverIP = serverIPField.getText();
         String serverPortText = serverPortField.getText();
-
         // Check for missing data
         if (serverIP.isEmpty() || serverPortText.isEmpty()) {
             // Show a notification if there is missing data

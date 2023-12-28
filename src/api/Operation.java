@@ -5,4 +5,5 @@ public enum Operation {
     SignUp,
     None,
     SetUserInfo,
+    SessionKey,
 }

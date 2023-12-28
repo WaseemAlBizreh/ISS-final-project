@@ -5,6 +5,9 @@ import api.ServerClientHandler;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,7 +39,9 @@ public class ServerApp {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException {
+        Utils utils=new Utils();
+        utils.checkpgp();
         int port = 8080; // Specify your desired port
         ServerApp serverController = new ServerApp(port);
         serverController.startServer();
