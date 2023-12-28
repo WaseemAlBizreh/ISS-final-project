@@ -17,17 +17,9 @@ public class ClientApp {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                try {
+
                     utils.checkpgp();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (NoSuchProviderException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidKeySpecException e) {
-                    throw new RuntimeException(e);
-                }
+
                 ClientSocket clientSocket = new ClientSocket();
                 ConnectView clientView = new ConnectView(clientSocket);
             }

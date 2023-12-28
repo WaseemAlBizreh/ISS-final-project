@@ -1,5 +1,6 @@
 package api;
 
+import app.Utils;
 import model.Message;
 import security.AES;
 
@@ -8,6 +9,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +23,7 @@ public class ServerClientHandler implements Runnable {
     private final ObjectOutputStream sender;
     private final ObjectInputStream receiver;
     private static SecretKey symmetricKey;
+    public PublicKey clientKey;
 
     public ServerClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -37,7 +44,20 @@ public class ServerClientHandler implements Runnable {
 
     @Override
     public void run() {
+        //hand shaking
+            Utils utils=new Utils();
+            KeyPair keyPair= utils.servercheckpgp();
+            try {
+                clientKey=(PublicKey) receiver.readObject();
+                sender.writeObject(keyPair.getPublic());
+                sender.flush();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
         try {
+            //handshaking
+
             // Handle client requests
             while (true) {
                 //TODO: receive Header { 0: Encryption.None , 1:Encryption.AES }

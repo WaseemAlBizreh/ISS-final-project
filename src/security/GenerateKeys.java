@@ -28,7 +28,6 @@ public class GenerateKeys {
         this.pair = this.keyGen.generateKeyPair();
         this.privateKey = pair.getPrivate();
         this.publicKey = pair.getPublic();
-
     }
 
     public KeyPair getPair() {

@@ -39,9 +39,7 @@ public class ServerApp {
         }
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, NoSuchProviderException {
-        Utils utils=new Utils();
-        utils.checkpgp();
+    public static void main(String[] args)  {
         int port = 8080; // Specify your desired port
         ServerApp serverController = new ServerApp(port);
         serverController.startServer();
