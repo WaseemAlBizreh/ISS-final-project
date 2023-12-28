@@ -3,8 +3,7 @@ package api;
 import app.Utils;
 import model.Message;
 import security.AES;
-import security.GenerateKeys;
-import security.JavaPGP;
+
 import controller.ServerAddProjectOrMarks;
 import controller.ServerRegistration;
 import controller.Server_login_registerController;
@@ -17,10 +16,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
-import java.nio.charset.StandardCharsets;
+
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,7 +89,7 @@ public class ServerClientHandler implements Runnable {
                         break;
                 }
             }
-        } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | CustomException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             // Remove this client handler from the list
@@ -106,7 +104,7 @@ public class ServerClientHandler implements Runnable {
         }
     }
 
-    private void receiveNormalMessage(Object receivedData) throws IOException {
+    private void receiveNormalMessage(Object receivedData) throws IOException, NoSuchAlgorithmException, CustomException {
         // Receive request message
         Message request = (Message) receivedData;
 
@@ -144,7 +142,7 @@ public class ServerClientHandler implements Runnable {
     ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
     ServerRegistration register = new ServerRegistration();
 
-    private Message handleClientRequests(Message request) {
+    private Message handleClientRequests(Message request) throws NoSuchAlgorithmException, CustomException {
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);
