@@ -3,17 +3,18 @@ package api;
 import app.Utils;
 import model.Message;
 import security.AES;
+import security.GenerateKeys;
+import security.JavaPGP;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 

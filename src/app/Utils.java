@@ -17,7 +17,7 @@ public class Utils {
         File file =new File("D:\\path\\client\\keys\\publickey.txt");
         if (file.exists()){
             //get public
-            GenerateKeys generateKeys=new GenerateKeys();
+            GenerateKeys generateKeys=new GenerateKeys(4096);
             byte[] publicKeyBytes= generateKeys.readFromFile("D:\\path\\client\\keys\\publickey.txt");
             KeyFactory kf = KeyFactory.getInstance("RSA");
             X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
@@ -29,7 +29,7 @@ public class Utils {
             PrivateKey privatekey = kf1.generatePrivate(spec1);
             return new KeyPair(publicKey,privatekey);
         }else {
-            GenerateKeys generateKeys = new GenerateKeys();
+            GenerateKeys generateKeys = new GenerateKeys(4096);
             generateKeys.createKeys();
             PublicKey publicKey = generateKeys.getPublicKey();
             PrivateKey privateKey = generateKeys.getPrivateKey();
@@ -53,7 +53,7 @@ public class Utils {
             //get public
             GenerateKeys generateKeys= null;
 
-                generateKeys = new GenerateKeys();
+                generateKeys = new GenerateKeys(4096);
 
             byte[] publicKeyBytes= generateKeys.readFromFile("D:\\path\\server\\keys\\publickey.txt");
             KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -67,7 +67,7 @@ public class Utils {
             return new KeyPair(publicKey,privatekey);
 
         }else {
-            GenerateKeys generateKeys = new GenerateKeys();
+            GenerateKeys generateKeys = new GenerateKeys(4096);
             generateKeys.createKeys();
             PublicKey publicKey = generateKeys.getPublicKey();
             PrivateKey privateKey = generateKeys.getPrivateKey();

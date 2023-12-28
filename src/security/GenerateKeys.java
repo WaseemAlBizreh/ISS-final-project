@@ -15,11 +15,11 @@ public class GenerateKeys {
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
-    public GenerateKeys()
+    public GenerateKeys(int keysize)
             throws NoSuchAlgorithmException {
 
         this.keyGen = KeyPairGenerator.getInstance("RSA");
-        this.keyGen.initialize(1024);
+        this.keyGen.initialize(keysize);
 
     }
 
