@@ -19,13 +19,7 @@ public class ClientApp {
             public void run() {
                 try {
                     utils.checkpgp();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (NoSuchProviderException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidKeySpecException e) {
+                } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException | NoSuchProviderException e) {
                     throw new RuntimeException(e);
                 }
                 ClientSocket clientSocket = new ClientSocket();

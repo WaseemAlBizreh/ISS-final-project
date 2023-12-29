@@ -13,14 +13,14 @@ public class Utils {
 
 
     public KeyPair checkpgp() throws NoSuchAlgorithmException, NoSuchProviderException, IOException, InvalidKeySpecException {
-        File file =new File("D:\\path\\to\\keys\\publickey.txt");
+        File file =new File("C:\\Users\\Saria Alzoubi\\Desktop\\NetworkProject\\group1\\filePublic.txt");
         if (file.exists()){
             GenerateKeys generateKeys=new GenerateKeys();
-            byte[] publicKeyBytes= generateKeys.readFromFile("D:\\path\\to\\keys\\publickey.txt");
+            byte[] publicKeyBytes= generateKeys.readFromFile("C:\\Users\\Saria Alzoubi\\Desktop\\NetworkProject\\group1\\filePublic.txt");
             KeyFactory kf = KeyFactory.getInstance("RSA");
             X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
             PublicKey publicKey = kf.generatePublic(spec);
-            byte[] privateKeyBytes= generateKeys.readFromFile("D:\\path\\to\\keys\\privatekey.txt");
+            byte[] privateKeyBytes= generateKeys.readFromFile("C:\\Users\\Saria Alzoubi\\Desktop\\NetworkProject\\group1\\filePrivate.txt");
             KeyFactory kf1 = KeyFactory.getInstance("RSA");
             PKCS8EncodedKeySpec spec1 = new PKCS8EncodedKeySpec(privateKeyBytes);
             PrivateKey privatekey = kf1.generatePrivate(spec1);
@@ -30,8 +30,8 @@ public class Utils {
             generateKeys.createKeys();
             PublicKey publicKey = generateKeys.getPublicKey();
             PrivateKey privateKey = generateKeys.getPrivateKey();
-            generateKeys.writeToFile("D:\\path\\to\\keys\\publickey.txt", publicKey.getEncoded());
-            generateKeys.writeToFile("D:\\path\\to\\keys\\privatekey.txt", privateKey.getEncoded());
+            generateKeys.writeToFile("C:\\Users\\Saria Alzoubi\\Desktop\\NetworkProject\\group1\\filePublic.txt", publicKey.getEncoded());
+            generateKeys.writeToFile("C:\\Users\\Saria Alzoubi\\Desktop\\NetworkProject\\group1\\filePrivate.txt", privateKey.getEncoded());
             return generateKeys.getPair();
         }
     }

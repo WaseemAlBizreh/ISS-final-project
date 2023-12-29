@@ -12,9 +12,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-/**
- * An implementation of PGP encryption (PGP = Pretty Good Privacy)
- */
+
 public final class JavaPGP {
 
 
@@ -35,7 +33,6 @@ public final class JavaPGP {
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] encryptedMessage = new byte[buffer.remaining()];
         buffer.get(encryptedMessage);
-
         return cipher.doFinal(encryptedMessage);
     }
 
