@@ -4,6 +4,8 @@ public enum Operation {
     Login,
     SignUp,
     None,
-    SetUserInfo,
     SessionKey,
+    Register,
+    Project,
+    Marks
 }

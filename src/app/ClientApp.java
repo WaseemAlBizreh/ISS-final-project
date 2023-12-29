@@ -22,6 +22,7 @@ public class ClientApp {
                 } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException | NoSuchProviderException e) {
                     throw new RuntimeException(e);
                 }
+
                 ClientSocket clientSocket = new ClientSocket();
                 ConnectView clientView = new ConnectView(clientSocket);
             }

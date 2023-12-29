@@ -1,13 +1,24 @@
 package api;
 
+import app.Utils;
 import model.Message;
 import security.AES;
+
+import controller.ServerAddProjectOrMarks;
+import controller.ServerRegistration;
+import controller.Server_login_registerController;
+import exception.CustomException;
+import model.*;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+
+import java.security.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +28,7 @@ public class ServerClientHandler implements Runnable {
     private final ObjectOutputStream sender;
     private final ObjectInputStream receiver;
     private static SecretKey symmetricKey;
+    public PublicKey clientKey;
 
     public ServerClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -37,7 +49,20 @@ public class ServerClientHandler implements Runnable {
 
     @Override
     public void run() {
+        //hand shaking
+            Utils utils=new Utils();
+            KeyPair keyPair= utils.servercheckpgp();
+            try {
+                clientKey=(PublicKey) receiver.readObject();
+                sender.writeObject(keyPair.getPublic());
+                sender.flush();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
         try {
+            //handshaking
+
             // Handle client requests
             while (true) {
                 //TODO: receive Header { 0: Encryption.None , 1:Encryption.AES }
@@ -79,7 +104,7 @@ public class ServerClientHandler implements Runnable {
         }
     }
 
-    private void receiveNormalMessage(Object receivedData) throws IOException {
+    private void receiveNormalMessage(Object receivedData) throws IOException, NoSuchAlgorithmException, CustomException {
         // Receive request message
         Message request = (Message) receivedData;
 
@@ -113,23 +138,56 @@ public class ServerClientHandler implements Runnable {
         sender.writeObject(response);
         sender.flush();
     }
+    Server_login_registerController m = new Server_login_registerController();
+    ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
+    ServerRegistration register = new ServerRegistration();
 
-    private Message handleClientRequests(Message request) {
+    private Message handleClientRequests(Message request) throws NoSuchAlgorithmException, CustomException {
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);
             case Login:
+
+                LoginRegisterModel log = (LoginRegisterModel) request.getBody();
+                symmetricKey = AES.generateSecretKey(log.password);
+                RegistrationModel r=  m.login(log.username,log.password);
+
                 //TODO: write login function Here
-                //retrun controller.login(request)
-                return new Message("Login", Operation.Login);
+                return new Message(r, Operation.Login);
+
+
             case SignUp:
                 //TODO: write SignUp function Here
-                //retrun controller.signUp(request)
-                return new Message("SignUp", Operation.SignUp);
-            case SetUserInfo:
-                //TODO: write SetUserInfo Here, and set info data
-                symmetricKey = AES.generateSecretKey("Info data");
-                return new Message("SetUserInfo", Operation.SetUserInfo);
+                LoginRegisterModel e = (LoginRegisterModel) request.getBody();
+               symmetricKey = AES.generateSecretKey(e.password);
+              int y=  m.register(e.username,e.password);
+                String id = Integer.toString(y);
+                return new Message(id, Operation.SignUp);
+
+            case Project:
+                //TODO: write Project function Here
+                AddData d = (AddData) request.getBody();
+                int c=  pm.addProject(d);
+                String idd = Integer.toString(c);
+                return new Message(idd, Operation.Project);
+
+            case Marks:
+                //TODO: write Marks function Here
+                AddData da = (AddData) request.getBody();
+                int s=  pm.addMaterialMarks(da);
+                String v = Integer.toString(s);
+                return new Message(v, Operation.Marks);
+
+
+            case Register:
+                RegistrationModel reg = (RegistrationModel) request.getBody();
+                symmetricKey = AES.generateSecretKey(reg.nationalNumber);
+                RegistrationModel m =  register.Registration(reg);
+
+
+                //TODO: write Register function Here
+                return new Message(m, Operation.Register);
+
             case SessionKey:
                 //return controller.SessionKey()
             default:

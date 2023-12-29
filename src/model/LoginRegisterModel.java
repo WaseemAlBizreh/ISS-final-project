@@ -1,6 +1,6 @@
 package model;
 
-public class    LoginRegisterModel extends Model {
+public class LoginRegisterModel extends Model {
     public String username;
     public String password;
 

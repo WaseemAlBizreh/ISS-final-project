@@ -1,5 +1,6 @@
 package api;
 
+import app.Utils;
 import exception.CustomException;
 import model.Message;
 import security.AES;
@@ -9,13 +10,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyPair;
+import java.security.PublicKey;
 
 public class ClientSocket {
     private Socket socket;
     private ObjectOutputStream sender;
     private ObjectInputStream receiver;
-    private static SecretKey symmetricKey;
-
+    public static SecretKey symmetricKey;
+    public PublicKey serverKey;
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
         // Establish a socket connection to the server
         socket = new Socket(serverIP, serverPort);
@@ -25,7 +28,18 @@ public class ClientSocket {
 
         // Establish Receiver
         receiver = new ObjectInputStream(socket.getInputStream());
-
+        //handshaking lol XD
+            //send public key to server
+            Utils utils=new Utils();
+            KeyPair keyPair=utils.checkpgp();
+            sender.writeObject(keyPair.getPublic());
+            sender.flush();
+            //recieve public key from server
+        try {
+             serverKey =(PublicKey) receiver.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         // let's print a message for now
         System.out.println("Connected to server at " + serverIP + ":" + serverPort);
         return true;
