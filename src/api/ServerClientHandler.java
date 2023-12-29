@@ -9,8 +9,11 @@ import controller.ServerRegistration;
 import controller.Server_login_registerController;
 import exception.CustomException;
 import model.*;
+import security.JavaPGP;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -20,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ServerClientHandler implements Runnable {
@@ -29,6 +33,8 @@ public class ServerClientHandler implements Runnable {
     private final ObjectInputStream receiver;
     private static SecretKey symmetricKey;
     public PublicKey clientKey;
+    public static SecretKey sessionKey;
+    private KeyPair keyPair;
 
     public ServerClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -50,15 +56,11 @@ public class ServerClientHandler implements Runnable {
     @Override
     public void run() {
         //hand shaking
-            Utils utils=new Utils();
-            KeyPair keyPair= utils.servercheckpgp();
-            try {
-                clientKey=(PublicKey) receiver.readObject();
-                sender.writeObject(keyPair.getPublic());
-                sender.flush();
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+
+        if(handShaking()!=null)
+            receiveSessionKey();
+
+
 
         try {
             //handshaking
@@ -102,6 +104,34 @@ public class ServerClientHandler implements Runnable {
                 ioException.printStackTrace();
             }
         }
+    }
+
+    private SecretKey receiveSessionKey(){
+        SecretKey key2=null;
+        try {
+            byte [] session=(byte[]) receiver.readObject();
+            session=JavaPGP.decrypt(session,keyPair.getPrivate());
+             key2 = new SecretKeySpec(session, 0, session.length, "DES");
+             String message= "sessionKey confirmed";
+             sender.writeObject(message);
+             sender.flush();
+        } catch (IOException | ClassNotFoundException ioException) {
+            ioException.printStackTrace();
+        }
+        return key2;
+    }
+
+    private PublicKey handShaking(){
+        Utils utils=new Utils();
+        keyPair= utils.serverCheckPgp();
+        try {
+            clientKey= (PublicKey) receiver.readObject();
+            sender.writeObject(keyPair.getPublic());
+            sender.flush();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return clientKey;
     }
 
     private void receiveNormalMessage(Object receivedData) throws IOException, NoSuchAlgorithmException, CustomException {

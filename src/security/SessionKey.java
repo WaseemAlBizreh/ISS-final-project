@@ -4,21 +4,26 @@ import model.Message;
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 
 import javax.crypto.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.*;
 
 public class SessionKey {
 
 
-    private final String algorithm = "DES";
-    private SecretKey sessionKey;
-    private KeyGenerator keyGenerator = KeyGenerator.getInstance(algorithm);
+    private final SecretKey sessionKey;
 
     public SessionKey() throws NoSuchAlgorithmException {
-        this.keyGenerator.init(2048);
+        String algorithm = "DES";
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(algorithm);
+        keyGenerator.init(56);
         this.sessionKey = keyGenerator.generateKey();
     }
 
-
+    public SecretKey getSessionKey() {
+        return sessionKey;
+    }
 
     public static String encrypt(Message message, SecretKey key) throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance("DES");
@@ -43,5 +48,15 @@ public class SessionKey {
             System.out.println("Error" + exception.getMessage());
             return null;
         }
+    }
+
+    public void writeToFile(String path, byte[] key) throws IOException {
+
+        File file = new File(path);
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(key);
+        fos.flush();
+        fos.close();
+
     }
 }

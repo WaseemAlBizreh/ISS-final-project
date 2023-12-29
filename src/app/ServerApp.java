@@ -40,7 +40,7 @@ public class ServerApp {
     }
 
     public static void main(String[] args)  {
-        int port = 8080; // Specify your desired port
+        int port = 8090; // Specify your desired port
         ServerApp serverController = new ServerApp(port);
         serverController.startServer();
     }
