@@ -84,6 +84,7 @@ public class ClientSocket {
         try {
             // Generate Secret Key
             if (symmetricKey == null) {
+                System.out.println("generate key Data !!");
                 symmetricKey = AES.generateSecretKey("data");
             }
 

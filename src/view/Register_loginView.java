@@ -28,7 +28,7 @@ public class Register_loginView {
     private void createAndShowGUI() {
         frame = new JFrame("Login");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 300);
+        frame.setSize(450, 300);
         frame.setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
@@ -122,8 +122,13 @@ public class Register_loginView {
                 } else {
                     System.out.println(userInfo.id);
                     System.out.println(userInfo.role);
+                    if (userInfo.email == null || userInfo.phoneNumber == null) {
+                        // Navigate to Registration View to Continue User Info
+                        RegistrationForm registrationForm = new RegistrationForm(clientSocket, userInfo.id, username);
+                        frame.dispose();
+                    }
                     // Navigate to Student Projects View
-                    if (Objects.equals(userInfo.role, "Student")) {
+                    else if (Objects.equals(userInfo.role, "Student")) {
                         ProjectsView pro = new ProjectsView(clientSocket, userInfo);
                     } else {
                         // Navigate to PhD Marks View
@@ -152,16 +157,15 @@ public class Register_loginView {
                 // Check From Response
                 if (userId == 0) {
                     JOptionPane.showMessageDialog(frame, "The user already exists",
-                            "SignUp Fail" , JOptionPane.WARNING_MESSAGE);
+                            "SignUp Fail", JOptionPane.WARNING_MESSAGE);
                 } else {
                     // Navigate to Registration View to Continue User Info
-                    RegistrationForm f = new RegistrationForm(clientSocket, userId, username);
+                    RegistrationForm registrationForm = new RegistrationForm(clientSocket, userId, username);
                     frame.dispose();
                 }
             } catch (CustomException ex) {
                 ex.printStackTrace();
             }
-
         }
     }
 }

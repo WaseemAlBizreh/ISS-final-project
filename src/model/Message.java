@@ -101,6 +101,10 @@ public class Message extends Model implements Serializable {
                 LoginRegisterModel model = new LoginRegisterModel();
                 model.parseToModel(data);
                 return model;
+            case Register:
+                RegistrationModel registrationModel = new RegistrationModel();
+                registrationModel.parseToModel(data);
+                return registrationModel;
             default:
                 return null;
         }

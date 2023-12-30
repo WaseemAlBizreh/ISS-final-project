@@ -181,6 +181,7 @@ public class ServerClientHandler implements Runnable {
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);
+
             case Login:
                 // Extract Model from Message
                 LoginRegisterModel log = (LoginRegisterModel) request.getBody();
@@ -193,13 +194,28 @@ public class ServerClientHandler implements Runnable {
                     responseMessage.setMessage("Login Successfully");
                 }
                 return responseMessage;
+
             case SignUp:
-                //TODO: write SignUp function Here
-                LoginRegisterModel e = (LoginRegisterModel) request.getBody();
-                symmetricKey = AES.generateSecretKey(e.password);
-                int userId = loginSignUpController.register(e.username, e.password);
+                // Extract Model from Message
+                LoginRegisterModel signUp = (LoginRegisterModel) request.getBody();
+                // Do signUp Operation
+                int userId = loginSignUpController.register(signUp.username, signUp.password);
+                //Check response Success
+                if (userId != 0) {
+                    symmetricKey = AES.generateSecretKey(signUp.password);
+                }
+                //Create Response Message
                 String id = Integer.toString(userId);
                 return new Message(id, Operation.SignUp);
+
+            case Register:
+                //Get RegistrationModel data
+                RegistrationModel registrationForm = (RegistrationModel) request.getBody();
+                // Do Registration From
+                RegistrationModel responseData = register.Registration(registrationForm);
+                //Create Response Message
+                return new Message(responseData, Operation.Register);
+
             case Project:
                 //TODO: write Project function Here
                 AddData d = (AddData) request.getBody();
@@ -213,16 +229,6 @@ public class ServerClientHandler implements Runnable {
                 int s = pm.addMaterialMarks(da);
                 String v = Integer.toString(s);
                 return new Message(v, Operation.Marks);
-
-
-            case Register:
-                RegistrationModel reg = (RegistrationModel) request.getBody();
-                symmetricKey = AES.generateSecretKey(reg.nationalNumber);
-                RegistrationModel m = register.Registration(reg);
-
-
-                //TODO: write Register function Here
-                return new Message(m, Operation.Register);
 
             case SessionKey:
                 //return controller.SessionKey()

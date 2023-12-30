@@ -37,19 +37,17 @@ public class ConnectView {
             // Call the connectToServer method in the client controller
             boolean connect = clientSocket.connectToServer(serverIP, serverPort);
 
-            // Show the custom dialog
-            JOptionPane.showMessageDialog(frame, "Waiting Please, Processing ....",
-                    "Waiting Dialog", JOptionPane.INFORMATION_MESSAGE);
-
             //Close Dialog
             if (connect) {
                 JOptionPane.showMessageDialog(frame, "You Connect with Server Successfully.",
                         "Connect Successfully", JOptionPane.INFORMATION_MESSAGE);
-
+                //   RegistrationForm m = new RegistrationForm(clientSocket);
+                Register_loginView loginSignUp = new Register_loginView(clientSocket);
+                frame.dispose();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Enter valid Server Port.",
+                        "Invalid Port", JOptionPane.ERROR_MESSAGE);
             }
-            //   RegistrationForm m = new RegistrationForm(clientSocket);
-            Register_loginView loginSignUp = new Register_loginView(clientSocket);
-            frame.dispose();
         } catch (NumberFormatException | IOException e) {
             // Handle the case where the port is not a valid integer
             JOptionPane.showMessageDialog(frame, "Please enter a valid Server Port.",

@@ -43,27 +43,31 @@ public class Client_Login_registerController extends LoginRegisterController {
 
     @Override
     public int register(String username, String password) throws CustomException {
-
+        //Create Login Register Model
         LoginRegisterModel model = new LoginRegisterModel(username, password);
         model.username = username;
         model.password = password;
 
-        try {
+        //Create Message to Send Information
+        Message request = new Message(model, Operation.SignUp);
 
-            Message request = new Message(model, Operation.SignUp);
+        // Send Message to Server
+        Message response = clientSocket.sendMessageToServer(request, Encryption.None);
+
+        // Get Response Body
+        int responseBody = Integer.parseInt(response.getMessage());
+
+        //Print userId
+        System.out.println("userId: " + response);
+
+        //Check if response in Success
+        if (responseBody != 0) {
+            //Set Symmetric Key in Client is password
             ClientSocket.symmetricKey = AES.generateSecretKey(model.password);
-            Message response = clientSocket.sendMessageToServer(request, Encryption.None);
-
-            System.out.println("Server: " + response);
-            //response.getMessage();
-            return Integer.parseInt(response.getMessage());
-        } catch (CustomException e) {
-            System.out.println("error");
         }
-        //  Message request = new Message(model, Operation.SignUp);
-        // Message response = clientSocket.sendMessageToServer(request);
-        //   System.out.println("Server: " + response);
-        return 0;
+
+        //Return the Response
+        return responseBody;
     }
 
 }

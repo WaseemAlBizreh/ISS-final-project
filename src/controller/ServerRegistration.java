@@ -1,27 +1,22 @@
 package controller;
 
-import exception.CustomException;
-import model.LoginRegisterModel;
 import model.RegistrationModel;
-import repository.RegisterRepository;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import repository.UsersRepository;
 
 public class ServerRegistration {
 
-    RegisterRepository registerRepository = new RegisterRepository();
+    UsersRepository usersRepository = new UsersRepository();
 
-// دالة استكمال معلومات المستخدم
-    public RegistrationModel Registration(RegistrationModel model) throws CustomException {
+    // دالة استكمال معلومات المستخدم
+    public RegistrationModel Registration(RegistrationModel model) {
 
-        RegistrationModel registrationSuccessful = registerRepository.updateRegistration(model);
+        RegistrationModel registrationSuccessful = usersRepository.updateRegistration(model);
         if (registrationSuccessful != null) {
-            System.out.println("تم استكمال معلومات المستخدم بنجاح");
+            System.out.println("Registration Form Operation Success");
+            return registrationSuccessful;
         } else {
-            System.out.println("فشل في استكمال معلومات المستخدم");
+            System.out.println("Registration Form Operation Fail");
+            return null;
         }
-        return registrationSuccessful;
     }
 }
