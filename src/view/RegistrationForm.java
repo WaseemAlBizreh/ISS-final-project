@@ -1,35 +1,32 @@
 
 package view;
-        import api.ClientSocket;
-        import api.ClientSocket;
-        import api.Operation;
-        import exception.CustomException;
-        import model.LoginRegisterModel;
-        import model.Message;
 
-        import javax.swing.*;
-        import java.awt.*;
-        import java.awt.event.ActionEvent;
-        import java.awt.event.ActionListener;
-        import java.util.Objects;
+import api.ClientSocket;
+import controller.ClientRegistration;
+import exception.CustomException;
+import model.RegistrationModel;
 
-        import controller.*;
-        import model.RegistrationModel;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class RegistrationForm {
 
     private final ClientSocket clientSocket;
-int userid;
-    public RegistrationForm(ClientSocket clientSocket , int id) {
+    int userid;
+    private final String username;
+
+    public RegistrationForm(ClientSocket clientSocket, int id, String username) {
         this.clientSocket = clientSocket;
-        this.userid= id;
+        this.userid = id;
+        this.username = username;
         createAndShowGUI();
-
-
     }
 
 
-    private  void createAndShowGUI() {
+    private void createAndShowGUI() {
         JFrame frame = new JFrame("Registration");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 500);
@@ -65,7 +62,6 @@ int userid;
         JTextField phoneNumberField = new JTextField();
         formPanel.add(phoneNumberLabel);
         formPanel.add(phoneNumberField);
-
 
 
         JLabel addressLabel = new JLabel("Address:");
@@ -119,33 +115,31 @@ int userid;
                 String address = addressField.getText();
                 String nationalNumber = nationalNumberField.getText();
                 String role = studentRadioButton.isSelected() ? "Student" : "Teacher";
-                if (email.isEmpty() || phoneNumber.isEmpty() || mobileNumber.isEmpty() || address.isEmpty() || nationalNumber.isEmpty()|| role.isEmpty())
-                {
-                        JOptionPane.showMessageDialog(frame, "Please enter all the information");
+                if (email.isEmpty() || phoneNumber.isEmpty() || mobileNumber.isEmpty() || address.isEmpty() || nationalNumber.isEmpty() || role.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Please enter all the information");
 
+                } else {
+                    RegistrationModel model = new RegistrationModel(userid, username, email, phoneNumber, mobileNumber, address, nationalNumber, role);
+
+                    ClientRegistration v = new ClientRegistration(clientSocket);
+                    try {
+                        RegistrationModel response = v.Registration(model);
+                        System.out.println(response.id);
+                        System.out.println(response.role);
+
+                        if (Objects.equals(response.role, "Student")) {
+                            ProjectsView pro = new ProjectsView(clientSocket, response);
+                        } else {
+                            MarksView mar = new MarksView(clientSocket, response);
+                        }
+                        frame.dispose();
+
+
+                    } catch (CustomException ex) {
+                        ex.printStackTrace();
+                    }
                 }
-                else{
-                RegistrationModel model = new RegistrationModel(userid,email, phoneNumber,mobileNumber,address,nationalNumber,role);
-
-                ClientRegistration v = new ClientRegistration(clientSocket);
-                try {
-                    RegistrationModel response =  v.Registration(model);
-                   System.out.println(response.id);
-                   System.out.println(response.role);
-
-                   if(Objects.equals(response.role, "Student")){
-                       ProjectsView pro = new ProjectsView(clientSocket , response);
-                   }
-                   else {
-                       MarksView mar = new MarksView(clientSocket , response);
-                   }
-                    frame.dispose();
-
-
-                } catch (CustomException ex) {
-                    ex.printStackTrace();
-                }
-            }}
+            }
         });
 
         frame.add(panel);

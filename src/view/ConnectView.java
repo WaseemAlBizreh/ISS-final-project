@@ -1,10 +1,6 @@
 package view;
 
 import api.ClientSocket;
-import api.Encryption;
-import api.Operation;
-import model.LoginRegisterModel;
-import model.Message;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -40,32 +36,20 @@ public class ConnectView {
 
             // Call the connectToServer method in the client controller
             boolean connect = clientSocket.connectToServer(serverIP, serverPort);
+
+            // Show the custom dialog
+            JOptionPane.showMessageDialog(frame, "Waiting Please, Processing ....",
+                    "Waiting Dialog", JOptionPane.INFORMATION_MESSAGE);
+
+            //Close Dialog
             if (connect) {
                 JOptionPane.showMessageDialog(frame, "You Connect with Server Successfully.",
                         "Connect Successfully", JOptionPane.INFORMATION_MESSAGE);
 
-
             }
-         //   RegistrationForm m = new RegistrationForm(clientSocket);
-            Register_loginView f = new Register_loginView(clientSocket);
+            //   RegistrationForm m = new RegistrationForm(clientSocket);
+            Register_loginView loginSignUp = new Register_loginView(clientSocket);
             frame.dispose();
-            // You can perform other actions after successful connection, such as showing the next screen
-            //TODO: Navigate To Next Screen
-            //TODO: Write Code Here
-
-            try {
-                LoginRegisterModel body = new LoginRegisterModel("waseem", "pass");
-                Message request = new Message(body, Operation.Login);
-                // Send Message
-                Message response = clientSocket.sendMessageToServer(request, Encryption.None);
-                //Print Server Response
-                System.out.println("Server: " + response);
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(frame, e.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-
         } catch (NumberFormatException | IOException e) {
             // Handle the case where the port is not a valid integer
             JOptionPane.showMessageDialog(frame, "Please enter a valid Server Port.",
@@ -74,7 +58,7 @@ public class ConnectView {
     }
 
     private void buildScreen() {
-     //   Register_loginView f = new Register_loginView(clientSocket);
+        //   Register_loginView f = new Register_loginView(clientSocket);
         frame = new JFrame("Connect View");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(350, 200);
@@ -97,9 +81,7 @@ public class ConnectView {
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-
-             connectToServer();
+                connectToServer();
             }
         });
 

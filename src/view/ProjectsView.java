@@ -1,7 +1,7 @@
 package view;
+
 import api.ClientSocket;
 import controller.ClientAddProjectOrMarks;
-import controller.ClientRegistration;
 import exception.CustomException;
 import model.AddData;
 import model.RegistrationModel;
@@ -14,16 +14,15 @@ import java.awt.event.ActionListener;
 public class ProjectsView {
 
     private final ClientSocket clientSocket;
-    RegistrationModel mod;
-    public ProjectsView(ClientSocket clientSocket , RegistrationModel mod) {
+    RegistrationModel userInfo;
+
+    public ProjectsView(ClientSocket clientSocket, RegistrationModel mod) {
         this.clientSocket = clientSocket;
-        this.mod= mod;
+        this.userInfo = mod;
         createAndShowGUI();
-
-
     }
 
-    private  void createAndShowGUI() {
+    private void createAndShowGUI() {
         JFrame frame = new JFrame("Projects");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -69,30 +68,26 @@ public class ProjectsView {
             public void actionPerformed(ActionEvent e) {
                 String description = descriptionField.getText();
 
-                if (description.isEmpty()  )
-                {
+                if (description.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Please enter the description");
 
+                } else {
+                    AddData data = new AddData(userInfo.id, description);
+
+
+                    ClientAddProjectOrMarks v = new ClientAddProjectOrMarks(clientSocket);
+                    try {
+                        int r = v.addProject(data);
+                        System.out.println(r);
+                        JOptionPane.showMessageDialog(frame, "The description has been successfully added");
+                    } catch (CustomException ex) {
+                        ex.printStackTrace();
+                    }
+
+
+                    //   JOptionPane.showMessageDialog(frame, "Description: " + description, "Project Details", JOptionPane.INFORMATION_MESSAGE);
                 }
-                else
-                {
-                AddData data =new AddData(mod.id,description);
-
-
-                ClientAddProjectOrMarks v = new ClientAddProjectOrMarks(clientSocket);
-                try {
-                    int r =  v.addProject(data);
-                    System.out.println(r);
-                    JOptionPane.showMessageDialog(frame, "The description has been successfully added");
-                } catch (CustomException ex) {
-                    ex.printStackTrace();
-                }
-
-
-
-
-             //   JOptionPane.showMessageDialog(frame, "Description: " + description, "Project Details", JOptionPane.INFORMATION_MESSAGE);
-            }}
+            }
         });
 
         frame.add(panel);

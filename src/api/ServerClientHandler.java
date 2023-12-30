@@ -1,29 +1,28 @@
 package api;
 
 import app.Utils;
-import model.Message;
-import security.AES;
-
 import controller.ServerAddProjectOrMarks;
 import controller.ServerRegistration;
 import controller.Server_login_registerController;
 import exception.CustomException;
-import model.*;
+import model.AddData;
+import model.LoginRegisterModel;
+import model.Message;
+import model.RegistrationModel;
+import security.AES;
 import security.JavaPGP;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-
-import java.security.*;
-
+import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ServerClientHandler implements Runnable {
@@ -35,6 +34,9 @@ public class ServerClientHandler implements Runnable {
     public PublicKey clientKey;
     public static SecretKey sessionKey;
     private KeyPair keyPair;
+    Server_login_registerController loginSignUpController = new Server_login_registerController();
+    ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
+    ServerRegistration register = new ServerRegistration();
 
     public ServerClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -57,9 +59,8 @@ public class ServerClientHandler implements Runnable {
     public void run() {
         //hand shaking
 
-        if(handShaking()!=null)
+        if (handShaking() != null)
             receiveSessionKey();
-
 
 
         try {
@@ -69,7 +70,14 @@ public class ServerClientHandler implements Runnable {
             while (true) {
                 //TODO: receive Header { 0: Encryption.None , 1:Encryption.AES }
                 byte[] typeEncryption = new byte[1];
-                int bytesRead = receiver.read(typeEncryption);
+                int bytesRead;
+
+                try {
+                    bytesRead = receiver.read(typeEncryption);
+                } catch (SocketException e) {
+                    System.out.println("Client disconnected: " + clientSocket.getInetAddress());
+                    break;
+                }
 
                 // Check if the client has disconnected
                 if (bytesRead == -1) {
@@ -82,7 +90,7 @@ public class ServerClientHandler implements Runnable {
                 Object receivedData = receiver.readObject();
 
                 //TODO: add case if there new Encryption Type
-                switch (typeEncryption[0]){
+                switch (typeEncryption[0]) {
                     case 0:
                         receiveNormalMessage(receivedData);
                         break;
@@ -106,26 +114,26 @@ public class ServerClientHandler implements Runnable {
         }
     }
 
-    private SecretKey receiveSessionKey(){
-        SecretKey key2=null;
+    private SecretKey receiveSessionKey() {
+        SecretKey key2 = null;
         try {
-            byte [] session=(byte[]) receiver.readObject();
-            session=JavaPGP.decrypt(session,keyPair.getPrivate());
-             key2 = new SecretKeySpec(session, 0, session.length, "DES");
-             String message= "sessionKey confirmed";
-             sender.writeObject(message);
-             sender.flush();
+            byte[] session = (byte[]) receiver.readObject();
+            session = JavaPGP.decrypt(session, keyPair.getPrivate());
+            key2 = new SecretKeySpec(session, 0, session.length, "DES");
+            String message = "sessionKey confirmed";
+            sender.writeObject(message);
+            sender.flush();
         } catch (IOException | ClassNotFoundException ioException) {
             ioException.printStackTrace();
         }
         return key2;
     }
 
-    private PublicKey handShaking(){
-        Utils utils=new Utils();
-        keyPair= utils.serverCheckPgp();
+    private PublicKey handShaking() {
+        Utils utils = new Utils();
+        keyPair = utils.serverCheckPgp();
         try {
-            clientKey= (PublicKey) receiver.readObject();
+            clientKey = (PublicKey) receiver.readObject();
             sender.writeObject(keyPair.getPublic());
             sender.flush();
         } catch (IOException | ClassNotFoundException e) {
@@ -168,43 +176,41 @@ public class ServerClientHandler implements Runnable {
         sender.writeObject(response);
         sender.flush();
     }
-    Server_login_registerController m = new Server_login_registerController();
-    ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
-    ServerRegistration register = new ServerRegistration();
 
     private Message handleClientRequests(Message request) throws NoSuchAlgorithmException, CustomException {
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);
             case Login:
-
+                // Extract Model from Message
                 LoginRegisterModel log = (LoginRegisterModel) request.getBody();
-                symmetricKey = AES.generateSecretKey(log.password);
-                RegistrationModel r=  m.login(log.username,log.password);
-
-                //TODO: write login function Here
-                return new Message(r, Operation.Login);
-
-
+                // Do Login Operation
+                RegistrationModel response = loginSignUpController.login(log.username, log.password);
+                //Create Response Message
+                Message responseMessage = new Message(response, Operation.Login);
+                if (response != null) {
+                    symmetricKey = AES.generateSecretKey(log.password);
+                    responseMessage.setMessage("Login Successfully");
+                }
+                return responseMessage;
             case SignUp:
                 //TODO: write SignUp function Here
                 LoginRegisterModel e = (LoginRegisterModel) request.getBody();
-               symmetricKey = AES.generateSecretKey(e.password);
-              int y=  m.register(e.username,e.password);
-                String id = Integer.toString(y);
+                symmetricKey = AES.generateSecretKey(e.password);
+                int userId = loginSignUpController.register(e.username, e.password);
+                String id = Integer.toString(userId);
                 return new Message(id, Operation.SignUp);
-
             case Project:
                 //TODO: write Project function Here
                 AddData d = (AddData) request.getBody();
-                int c=  pm.addProject(d);
+                int c = pm.addProject(d);
                 String idd = Integer.toString(c);
                 return new Message(idd, Operation.Project);
 
             case Marks:
                 //TODO: write Marks function Here
                 AddData da = (AddData) request.getBody();
-                int s=  pm.addMaterialMarks(da);
+                int s = pm.addMaterialMarks(da);
                 String v = Integer.toString(s);
                 return new Message(v, Operation.Marks);
 
@@ -212,7 +218,7 @@ public class ServerClientHandler implements Runnable {
             case Register:
                 RegistrationModel reg = (RegistrationModel) request.getBody();
                 symmetricKey = AES.generateSecretKey(reg.nationalNumber);
-                RegistrationModel m =  register.Registration(reg);
+                RegistrationModel m = register.Registration(reg);
 
 
                 //TODO: write Register function Here

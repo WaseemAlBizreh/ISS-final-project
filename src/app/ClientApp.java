@@ -7,7 +7,7 @@ import javax.swing.*;
 
 public class ClientApp {
     public static void main(String[] args) {
-        Utils utils=new Utils();
+        Utils utils = new Utils();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
