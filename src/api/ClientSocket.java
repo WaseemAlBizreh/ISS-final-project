@@ -22,6 +22,7 @@ public class ClientSocket {
     private ObjectInputStream receiver;
     public static SecretKey symmetricKey;
     public PublicKey serverKey;
+    public static SessionKey sessionKey;
 
 
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
@@ -48,6 +49,8 @@ public class ClientSocket {
         //TODO: add elseif (encryption == Encryption.TYPE) when new encryption type added
         if (encryption == Encryption.AES) {
             return sendEncryptMessage(message);
+        }else if(encryption==Encryption.DES){
+           return  sendEncryptMessagePGP(message);
         } else {
             return sendNormalMessage(message);
         }
@@ -112,14 +115,45 @@ public class ClientSocket {
         }
     }
 
+    private Message sendEncryptMessagePGP(Message request) throws CustomException {
+        if (sender == null) {
+            throw new CustomException("Not connected to the server");
+        }
+        try {
+            // Generate Secret Key
+            if (sessionKey == null) {
+                throw new CustomException("session key not generated");
+            }
+
+            // encrypt Message
+
+            String messageEncrypt = SessionKey.encrypt(request,sessionKey.getSessionKey());
+            System.out.println("messageEncrypt:::::"+messageEncrypt);
+
+            sender.writeByte(2);
+            sender.flush();
+            //sendMessage
+            sender.writeObject(messageEncrypt);
+            sender.flush();
+            //receiveResponse
+            String responseString = (String) receiver.readObject();
+            // decrypt Message
+            return SessionKey.decrypt(responseString, sessionKey.getSessionKey());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private void sendSessionKey() {
         try {
-            SessionKey sessionKey = new SessionKey();
+             sessionKey = new SessionKey();
             byte[] session = JavaPGP.encrypt(sessionKey.getSessionKey().getEncoded(), serverKey);
             sender.writeObject(session);
             sender.flush();
             String message = (String) receiver.readObject();
             System.out.println(message);
+
         } catch (NoSuchAlgorithmException | IOException | ClassNotFoundException e) {
             System.out.println(e.getMessage());
         }

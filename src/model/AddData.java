@@ -11,17 +11,11 @@ public class AddData extends Model{
         this.content = content;
     }
     public AddData(int id,  String content) {
+        super();
         this.id = id;
-
         this.content = content;
     }
 
-
-
-    @Override
-    public String toString() {
-        return null;
-    }
 
     @Override
     public void parseToModel(String message) {

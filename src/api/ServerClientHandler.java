@@ -11,6 +11,7 @@ import model.Message;
 import model.RegistrationModel;
 import security.AES;
 import security.JavaPGP;
+import security.SessionKey;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -72,6 +73,7 @@ public class ServerClientHandler implements Runnable {
                 byte[] typeEncryption = new byte[1];
                 int bytesRead;
 
+
                 try {
                     bytesRead = receiver.read(typeEncryption);
                 } catch (SocketException e) {
@@ -88,7 +90,7 @@ public class ServerClientHandler implements Runnable {
 
                 // Receive a response from the Client
                 Object receivedData = receiver.readObject();
-
+                System.out.println(typeEncryption[0]);
                 //TODO: add case if there new Encryption Type
                 switch (typeEncryption[0]) {
                     case 0:
@@ -96,6 +98,9 @@ public class ServerClientHandler implements Runnable {
                         break;
                     case 1:
                         receiveSymmetricEncryptionMessage(receivedData);
+                        break;
+                    case 2:
+                        receivePGPEncryptionMessage(receivedData);
                         break;
                 }
             }
@@ -114,19 +119,19 @@ public class ServerClientHandler implements Runnable {
         }
     }
 
-    private SecretKey receiveSessionKey() {
+    private void receiveSessionKey() {
         SecretKey key2 = null;
         try {
             byte[] session = (byte[]) receiver.readObject();
             session = JavaPGP.decrypt(session, keyPair.getPrivate());
             key2 = new SecretKeySpec(session, 0, session.length, "DES");
+            sessionKey = key2;
             String message = "sessionKey confirmed";
             sender.writeObject(message);
             sender.flush();
         } catch (IOException | ClassNotFoundException ioException) {
             ioException.printStackTrace();
         }
-        return key2;
     }
 
     private PublicKey handShaking() {
@@ -177,7 +182,34 @@ public class ServerClientHandler implements Runnable {
         sender.flush();
     }
 
+    private void receivePGPEncryptionMessage(Object receivedData) throws Exception , CustomException{
+        String request = (String) receivedData;
+
+        // Check Secret Key
+        if (sessionKey == null) {
+            throw new CustomException("session Key not receive");
+        }
+
+        // decrypt request
+        Message decryptRequest = SessionKey.decrypt(request, sessionKey);
+
+        // handle Response Message
+        assert decryptRequest != null;
+
+        // encrypt response
+        Message message =new Message();
+        message.setMessage("تم استلام الرسالة");
+        SessionKey.encrypt(message,sessionKey);
+        String response = SessionKey.encrypt(message, sessionKey);
+
+        System.out.println("message after encryption: " + response);
+        // Send the response byte array
+        sender.writeObject(response);
+        sender.flush();
+    }
+
     private Message handleClientRequests(Message request) throws NoSuchAlgorithmException, CustomException {
+
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);

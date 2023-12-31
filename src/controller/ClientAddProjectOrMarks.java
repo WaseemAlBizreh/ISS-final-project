@@ -16,13 +16,11 @@ public class ClientAddProjectOrMarks {
     }
 
     public int addProject(AddData model) throws CustomException {
-
-        Message request = new Message( model , Operation.Project);
-
-        Message response = clientSocket.sendMessageToServer(request, Encryption.None);
-        int id = Integer.parseInt(response.getMessage());
+        Message request = new Message(model,Operation.Project);
+        Message response = clientSocket.sendMessageToServer(request, Encryption.DES);
+        int id = 1;
         return id;
-        // System.out.println("Server: " + response);
+
 
     }
     public int addMaterialMarks(AddData model) throws CustomException {

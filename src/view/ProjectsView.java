@@ -77,8 +77,8 @@ public class ProjectsView {
 
                     ClientAddProjectOrMarks v = new ClientAddProjectOrMarks(clientSocket);
                     try {
+
                         int r = v.addProject(data);
-                        System.out.println(r);
                         JOptionPane.showMessageDialog(frame, "The description has been successfully added");
                     } catch (CustomException ex) {
                         ex.printStackTrace();
@@ -94,5 +94,3 @@ public class ProjectsView {
         frame.setVisible(true);
     }
 }
-
-
