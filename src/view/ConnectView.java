@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.security.KeyPair;
 
 public class ConnectView {
     private JFrame frame;
@@ -13,9 +14,11 @@ public class ConnectView {
     private JTextField serverPortField;
 
     private final ClientSocket clientSocket;
+    private final KeyPair keys;
 
-    public ConnectView(ClientSocket clientSocket) {
+    public ConnectView(ClientSocket clientSocket, KeyPair keys) {
         this.clientSocket = clientSocket;
+        this.keys = keys;
         buildScreen();
     }
 
@@ -42,7 +45,7 @@ public class ConnectView {
                 JOptionPane.showMessageDialog(frame, "You Connect with Server Successfully.",
                         "Connect Successfully", JOptionPane.INFORMATION_MESSAGE);
                 //   RegistrationForm m = new RegistrationForm(clientSocket);
-                Register_loginView loginSignUp = new Register_loginView(clientSocket);
+                Register_loginView loginSignUp = new Register_loginView(clientSocket, keys);
                 frame.dispose();
             } else {
                 JOptionPane.showMessageDialog(frame, "Enter valid Server Port.",

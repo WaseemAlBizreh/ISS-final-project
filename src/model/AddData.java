@@ -4,8 +4,10 @@ public class AddData extends Model{
     public int id;
     public String name;
     public String content;
+    public String signatureBytes;
 
     public AddData (){}
+
 
     public AddData(int id, String name, String content) {
         this.id = id;
@@ -13,8 +15,8 @@ public class AddData extends Model{
         this.content = content;
     }
     public AddData(int id,  String content) {
-        super();
         this.id = id;
+
         this.content = content;
     }
 

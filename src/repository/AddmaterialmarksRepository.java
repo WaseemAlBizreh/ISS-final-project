@@ -48,6 +48,7 @@ public class AddmaterialmarksRepository extends Repository{
 
         } catch (SQLException e) {
             e.printStackTrace();
+
             return -1;
         }
     }

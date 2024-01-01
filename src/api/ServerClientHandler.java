@@ -73,7 +73,6 @@ public class ServerClientHandler implements Runnable {
                 byte[] typeEncryption = new byte[1];
                 int bytesRead;
 
-
                 try {
                     bytesRead = receiver.read(typeEncryption);
                 } catch (SocketException e) {
@@ -90,7 +89,7 @@ public class ServerClientHandler implements Runnable {
 
                 // Receive a response from the Client
                 Object receivedData = receiver.readObject();
-                System.out.println(typeEncryption[0]);
+
                 //TODO: add case if there new Encryption Type
                 switch (typeEncryption[0]) {
                     case 0:
@@ -152,7 +151,7 @@ public class ServerClientHandler implements Runnable {
         Message request = (Message) receivedData;
 
         // Process the received message
-        Message response = handleClientRequests(request);
+        Message response = handleClientRequests(request, clientKey);
 
         // Send the response message
         sender.writeObject(response);
@@ -171,7 +170,7 @@ public class ServerClientHandler implements Runnable {
         Message decryptRequest = AES.decryptMessage(request, symmetricKey);
 
         // handle Response Message
-        Message responseMessage = handleClientRequests(decryptRequest);
+        Message responseMessage = handleClientRequests(decryptRequest, clientKey);
 
         // encrypt response
         String response = AES.encryptMessage(responseMessage, symmetricKey);
@@ -207,7 +206,7 @@ public class ServerClientHandler implements Runnable {
         sender.flush();
     }
 
-    private Message handleClientRequests(Message request) throws NoSuchAlgorithmException, CustomException {
+    private Message handleClientRequests(Message request, PublicKey key) throws Exception {
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);
@@ -249,7 +248,6 @@ public class ServerClientHandler implements Runnable {
             case Project:
                 //TODO: write Project function Here
                 AddData d = (AddData) request.getBody();
-
                 int c = pm.addProject(d);
                 String idd = Integer.toString(c);
                 return new Message(idd, Operation.Project);

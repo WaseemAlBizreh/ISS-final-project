@@ -9,20 +9,26 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.KeyPair;
 import java.util.Objects;
 
 public class Register_loginView {
 
     private final ClientSocket clientSocket;
+    private final KeyPair keys;
+
     private JTextField usernameField;
     private JFrame frame;
     private JPasswordField passwordField;
     private final Client_Login_registerController loginRegisterController;
 
-    public Register_loginView(ClientSocket clientSocket) {
+    public Register_loginView(ClientSocket clientSocket, KeyPair keys) {
         this.clientSocket = clientSocket;
+        this.keys = keys;
         loginRegisterController = new Client_Login_registerController(clientSocket);
         createAndShowGUI();
+
+
     }
 
     private void createAndShowGUI() {
@@ -124,7 +130,7 @@ public class Register_loginView {
                     System.out.println(userInfo.role);
                     if (userInfo.email == null || userInfo.phoneNumber == null) {
                         // Navigate to Registration View to Continue User Info
-                        RegistrationForm registrationForm = new RegistrationForm(clientSocket, userInfo.id, username);
+                        RegistrationForm registrationForm = new RegistrationForm(clientSocket, userInfo.id, username , keys);
                         frame.dispose();
                     }
                     // Navigate to Student Projects View
@@ -132,7 +138,7 @@ public class Register_loginView {
                         ProjectsView pro = new ProjectsView(clientSocket, userInfo);
                     } else {
                         // Navigate to PhD Marks View
-                        MarksView mar = new MarksView(clientSocket, userInfo);
+                        MarksView mar = new MarksView(clientSocket, userInfo, keys);
                     }
                     frame.dispose();
                 }
@@ -160,7 +166,7 @@ public class Register_loginView {
                             "SignUp Fail", JOptionPane.WARNING_MESSAGE);
                 } else {
                     // Navigate to Registration View to Continue User Info
-                    RegistrationForm registrationForm = new RegistrationForm(clientSocket, userId, username);
+                    RegistrationForm registrationForm = new RegistrationForm(clientSocket, userId, username , keys);
                     frame.dispose();
                 }
             } catch (CustomException ex) {
