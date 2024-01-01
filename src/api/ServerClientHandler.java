@@ -146,7 +146,7 @@ public class ServerClientHandler implements Runnable {
         return clientKey;
     }
 
-    private void receiveNormalMessage(Object receivedData) throws IOException, NoSuchAlgorithmException, CustomException {
+    private void receiveNormalMessage(Object receivedData) throws Exception {
         // Receive request message
         Message request = (Message) receivedData;
 
@@ -195,7 +195,7 @@ public class ServerClientHandler implements Runnable {
         // handle Response Message
         assert decryptRequest != null;
 
-        Message message = handleClientRequests(decryptRequest);
+        Message message = handleClientRequests(decryptRequest,clientKey);
 
         // encrypt response
         String response = SessionKey.encrypt(message, sessionKey);
@@ -255,7 +255,7 @@ public class ServerClientHandler implements Runnable {
             case Marks:
                 //TODO: write Marks function Here
                 AddData da = (AddData) request.getBody();
-                int s = pm.addMaterialMarks(da);
+                int s = pm.addMaterialMarks(da,key);
                 String v = Integer.toString(s);
                 return new Message(v, Operation.Marks);
 
