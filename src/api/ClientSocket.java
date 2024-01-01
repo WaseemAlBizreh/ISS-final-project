@@ -4,6 +4,8 @@ import app.Utils;
 import exception.CustomException;
 import model.Message;
 import security.AES;
+import security.JavaPGP;
+import security.SessionKey;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 
 public class ClientSocket {
@@ -19,7 +22,10 @@ public class ClientSocket {
     private ObjectInputStream receiver;
     public static SecretKey symmetricKey;
     public PublicKey serverKey;
+
+
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
+
         // Establish a socket connection to the server
         socket = new Socket(serverIP, serverPort);
 
@@ -28,20 +34,13 @@ public class ClientSocket {
 
         // Establish Receiver
         receiver = new ObjectInputStream(socket.getInputStream());
-        //handshaking lol XD
-            //send public key to server
-            Utils utils=new Utils();
-            KeyPair keyPair=utils.checkpgp();
-            sender.writeObject(keyPair.getPublic());
-            sender.flush();
-            //recieve public key from server
-        try {
-             serverKey =(PublicKey) receiver.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        // handShaking and SessionKey
+        if (handShaking())
+            sendSessionKey();
+
         // let's print a message for now
         System.out.println("Connected to server at " + serverIP + ":" + serverPort);
+
         return true;
     }
 
@@ -85,6 +84,7 @@ public class ClientSocket {
         try {
             // Generate Secret Key
             if (symmetricKey == null) {
+                System.out.println("generate key Data !!");
                 symmetricKey = AES.generateSecretKey("data");
             }
 
@@ -109,6 +109,33 @@ public class ClientSocket {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private void sendSessionKey() {
+        try {
+            SessionKey sessionKey = new SessionKey();
+            byte[] session = JavaPGP.encrypt(sessionKey.getSessionKey().getEncoded(), serverKey);
+            sender.writeObject(session);
+            sender.flush();
+            String message = (String) receiver.readObject();
+            System.out.println(message);
+        } catch (NoSuchAlgorithmException | IOException | ClassNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private boolean handShaking() throws IOException {
+        Utils utils = new Utils();
+        KeyPair keyPair = utils.checkPgp();
+        sender.writeObject(keyPair.getPublic());
+        sender.flush();
+        //recieve public key from server
+        try {
+            serverKey = (PublicKey) receiver.readObject();
+            return true;
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 

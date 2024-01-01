@@ -5,62 +5,69 @@ import api.Encryption;
 import api.Operation;
 import exception.CustomException;
 import model.LoginRegisterModel;
-import model.*;
+import model.Message;
+import model.RegistrationModel;
 import security.AES;
-
-import javax.swing.*;
 
 
 public class Client_Login_registerController extends LoginRegisterController {
-String d;
+    String d;
     private final ClientSocket clientSocket;
 
     public Client_Login_registerController(ClientSocket clientSocket) {
         this.clientSocket = clientSocket;
-
     }
 
-    //@Override
+    @Override
     public RegistrationModel login(String username, String password) throws CustomException {
+        //Create Login Register Model
+        LoginRegisterModel model = new LoginRegisterModel(username, password);
 
-        LoginRegisterModel  model = new LoginRegisterModel(username,password );
+        //Create Message to Send Information
+        Message request = new Message(model, Operation.Login);
 
-      Message request = new Message( model ,Operation.Login);
-        ClientSocket.symmetricKey = AES.generateSecretKey(model.password);
-     // Message response = clientSocket.sendMessageToServer(request);
-
+        // Send Message to Server
         Message response = clientSocket.sendMessageToServer(request, Encryption.None);
-        RegistrationModel resp= (RegistrationModel) response.getBody();
-        return resp;
-     // System.out.println("Server: " + response);
 
+        // Get Response Body
+        RegistrationModel responseBody = (RegistrationModel) response.getBody();
 
+        //Check if response in Success
+        if (responseBody != null) {
+            //Set Symmetric Key in Client is password
+            ClientSocket.symmetricKey = AES.generateSecretKey(model.password);
+        }
+
+        return responseBody;
     }
 
     @Override
     public int register(String username, String password) throws CustomException {
+        //Create Login Register Model
+        LoginRegisterModel model = new LoginRegisterModel(username, password);
+        model.username = username;
+        model.password = password;
 
-        LoginRegisterModel  model = new LoginRegisterModel(username,password );
-             model.username= username;
-             model.password= password;
+        //Create Message to Send Information
+        Message request = new Message(model, Operation.SignUp);
 
-        try {
+        // Send Message to Server
+        Message response = clientSocket.sendMessageToServer(request, Encryption.None);
 
-            Message request = new Message(model, Operation.SignUp);
+        // Get Response Body
+        int responseBody = Integer.parseInt(response.getMessage());
+
+        //Print userId
+        System.out.println("userId: " + response);
+
+        //Check if response in Success
+        if (responseBody != 0) {
+            //Set Symmetric Key in Client is password
             ClientSocket.symmetricKey = AES.generateSecretKey(model.password);
-            Message response = clientSocket.sendMessageToServer(request, Encryption.None);
-
-            System.out.println("Server: " + response);
-            //response.getMessage();
-            int id = Integer.parseInt(response.getMessage());
-            return id;
-        } catch (CustomException e) {
-            System.out.println("error");
         }
-      //  Message request = new Message(model, Operation.SignUp);
-       // Message response = clientSocket.sendMessageToServer(request);
-     //   System.out.println("Server: " + response);
-return 0;
+
+        //Return the Response
+        return responseBody;
     }
 
 }
