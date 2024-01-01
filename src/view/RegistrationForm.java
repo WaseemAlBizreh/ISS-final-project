@@ -11,12 +11,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
-        import javax.swing.*;
-        import java.awt.*;
-        import java.awt.event.ActionEvent;
-        import java.awt.event.ActionListener;
-        import java.security.KeyPair;
-        import java.util.Objects;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.security.KeyPair;
+import java.util.Objects;
 
 public class RegistrationForm {
 
@@ -33,18 +33,17 @@ public class RegistrationForm {
     private JRadioButton studentRadioButton;
     private JRadioButton teacherRadioButton;
 
-    public RegistrationForm(ClientSocket clientSocket, int id, String username) {
+
     private final KeyPair keys;
-int userid;
 
 
-    public RegistrationForm(ClientSocket clientSocket , int id,KeyPair keys ) {
+    public RegistrationForm(ClientSocket clientSocket, int id, String username, KeyPair keys) {
         this.clientSocket = clientSocket;
-        this.userid = id;
+
         this.username = username;
         this.controller = new ClientRegistration(clientSocket);
         this.keys = keys;
-        this.userid= id;
+        this.userid = id;
         createAndShowGUI();
     }
 
@@ -85,7 +84,6 @@ int userid;
         phoneNumberField = new JTextField();
         formPanel.add(phoneNumberLabel);
         formPanel.add(phoneNumberField);
-
 
 
         JLabel addressLabel = new JLabel("Address:");
@@ -172,7 +170,7 @@ int userid;
                     ProjectsView pro = new ProjectsView(clientSocket, response);
                     frame.dispose();
                 } else {
-                    MarksView mar = new MarksView(clientSocket, response);
+                    MarksView mar = new MarksView(clientSocket, response, keys);
                     frame.dispose();
                 }
             } catch (CustomException ex) {

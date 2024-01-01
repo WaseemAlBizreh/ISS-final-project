@@ -13,15 +13,15 @@ import java.security.spec.X509EncodedKeySpec;
 
 public class ClientApp {
     public static void main(String[] args) {
-        Utils utils=new Utils();
+        Utils utils = new Utils();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
 
-                KeyPair keys=   utils.checkpgp();
+                KeyPair keys = utils.checkPgp();
 
                 ClientSocket clientSocket = new ClientSocket();
-                ConnectView clientView = new ConnectView(clientSocket,keys);
+                ConnectView clientView = new ConnectView(clientSocket, keys);
             }
         });
     }

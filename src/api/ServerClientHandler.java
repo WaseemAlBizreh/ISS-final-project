@@ -147,7 +147,7 @@ public class ServerClientHandler implements Runnable {
         Message request = (Message) receivedData;
 
         // Process the received message
-        Message response = handleClientRequests(request ,  clientKey);
+        Message response = handleClientRequests(request, clientKey);
 
         // Send the response message
         sender.writeObject(response);
@@ -166,7 +166,7 @@ public class ServerClientHandler implements Runnable {
         Message decryptRequest = AES.decryptMessage(request, symmetricKey);
 
         // handle Response Message
-        Message responseMessage = handleClientRequests(decryptRequest , clientKey);
+        Message responseMessage = handleClientRequests(decryptRequest, clientKey);
 
         // encrypt response
         String response = AES.encryptMessage(responseMessage, symmetricKey);
@@ -177,7 +177,7 @@ public class ServerClientHandler implements Runnable {
         sender.flush();
     }
 
-    private Message handleClientRequests(Message request , PublicKey key) throws Exception {
+    private Message handleClientRequests(Message request, PublicKey key) throws Exception {
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);
@@ -226,8 +226,8 @@ public class ServerClientHandler implements Runnable {
             case Marks:
                 //TODO: write Marks function Here
                 AddData da = (AddData) request.getBody();
-                int s = pm.addMaterialMarks(da);
-                int s=  pm.addMaterialMarks(da ,  key);
+
+                int s = pm.addMaterialMarks(da, key);
                 String v = Integer.toString(s);
                 return new Message(v, Operation.Marks);
 

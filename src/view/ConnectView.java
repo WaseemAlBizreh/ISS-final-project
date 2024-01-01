@@ -15,6 +15,7 @@ public class ConnectView {
 
     private final ClientSocket clientSocket;
     private final KeyPair keys;
+
     public ConnectView(ClientSocket clientSocket, KeyPair keys) {
         this.clientSocket = clientSocket;
         this.keys = keys;
@@ -44,7 +45,7 @@ public class ConnectView {
                 JOptionPane.showMessageDialog(frame, "You Connect with Server Successfully.",
                         "Connect Successfully", JOptionPane.INFORMATION_MESSAGE);
                 //   RegistrationForm m = new RegistrationForm(clientSocket);
-                Register_loginView loginSignUp = new Register_loginView(clientSocket);
+                Register_loginView loginSignUp = new Register_loginView(clientSocket, keys);
                 frame.dispose();
             } else {
                 JOptionPane.showMessageDialog(frame, "Enter valid Server Port.",
