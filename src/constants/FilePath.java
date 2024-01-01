@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 public class FilePath {
 
-    public static String desktopPath = System.getProperty("user.home") + "/Desktop\\ISS";
+    public static String desktopPath = System.getProperty("user.home") + "/Desktop\\ISSG";
 
     public static String createFile(String fileName, String type) {
         File file = new File(desktopPath);
