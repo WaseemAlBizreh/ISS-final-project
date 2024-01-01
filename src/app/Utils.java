@@ -14,16 +14,16 @@ public class Utils {
 
     public KeyPair checkpgp(){
         try{
-        File file =new File("D:\\path\\client\\keys\\publickey.txt");
+        File file =new File("C:\\path\\client\\keys\\publickey.txt");
         if (file.exists()){
             //get public
             GenerateKeys generateKeys=new GenerateKeys(4096);
-            byte[] publicKeyBytes= generateKeys.readFromFile("D:\\path\\client\\keys\\publickey.txt");
+            byte[] publicKeyBytes= generateKeys.readFromFile("C:\\path\\client\\keys\\publickey.txt");
             KeyFactory kf = KeyFactory.getInstance("RSA");
             X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
             PublicKey publicKey = kf.generatePublic(spec);
             //get private
-            byte[] privateKeyBytes= generateKeys.readFromFile("D:\\path\\client\\keys\\privatekey.txt");
+            byte[] privateKeyBytes= generateKeys.readFromFile("C:\\path\\client\\keys\\privatekey.txt");
             KeyFactory kf1 = KeyFactory.getInstance("RSA");
             PKCS8EncodedKeySpec spec1 = new PKCS8EncodedKeySpec(privateKeyBytes);
             PrivateKey privatekey = kf1.generatePrivate(spec1);
@@ -33,8 +33,8 @@ public class Utils {
             generateKeys.createKeys();
             PublicKey publicKey = generateKeys.getPublicKey();
             PrivateKey privateKey = generateKeys.getPrivateKey();
-            generateKeys.writeToFile("D:\\path\\client\\keys\\publickey.txt", publicKey.getEncoded());
-            generateKeys.writeToFile("D:\\path\\client\\keys\\privatekey.txt", privateKey.getEncoded());
+            generateKeys.writeToFile("C:\\path\\client\\keys\\publickey.txt", publicKey.getEncoded());
+            generateKeys.writeToFile("C:\\path\\client\\keys\\privatekey.txt", privateKey.getEncoded());
             return generateKeys.getPair();
         }
         } catch (NoSuchAlgorithmException e) {
@@ -48,19 +48,19 @@ public class Utils {
 
     public KeyPair servercheckpgp() {
         try {
-        File file =new File("D:\\path\\server\\to\\keys\\publickey.txt");
+        File file =new File("C:\\path\\server\\to\\keys\\publickey.txt");
         if (file.exists()){
             //get public
             GenerateKeys generateKeys= null;
 
                 generateKeys = new GenerateKeys(4096);
 
-            byte[] publicKeyBytes= generateKeys.readFromFile("D:\\path\\server\\keys\\publickey.txt");
+            byte[] publicKeyBytes= generateKeys.readFromFile("C:\\path\\server\\keys\\publickey.txt");
             KeyFactory kf = KeyFactory.getInstance("RSA");
             X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
             PublicKey publicKey = kf.generatePublic(spec);
             //get private
-            byte[] privateKeyBytes= generateKeys.readFromFile("D:\\path\\server\\keys\\privatekey.txt");
+            byte[] privateKeyBytes= generateKeys.readFromFile("C:\\path\\server\\keys\\privatekey.txt");
             KeyFactory kf1 = KeyFactory.getInstance("RSA");
             PKCS8EncodedKeySpec spec1 = new PKCS8EncodedKeySpec(privateKeyBytes);
             PrivateKey privatekey = kf1.generatePrivate(spec1);
@@ -71,8 +71,8 @@ public class Utils {
             generateKeys.createKeys();
             PublicKey publicKey = generateKeys.getPublicKey();
             PrivateKey privateKey = generateKeys.getPrivateKey();
-            generateKeys.writeToFile("D:\\path\\server\\keys\\publickey.txt", publicKey.getEncoded());
-            generateKeys.writeToFile("D:\\path\\server\\keys\\privatekey.txt", privateKey.getEncoded());
+            generateKeys.writeToFile("C:\\path\\server\\keys\\publickey.txt", publicKey.getEncoded());
+            generateKeys.writeToFile("C:\\path\\server\\keys\\privatekey.txt", privateKey.getEncoded());
             return generateKeys.getPair();
         }
         } catch (NoSuchAlgorithmException e) {

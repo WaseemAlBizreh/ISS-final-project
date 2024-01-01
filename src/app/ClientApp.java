@@ -18,10 +18,10 @@ public class ClientApp {
             @Override
             public void run() {
 
-                    utils.checkpgp();
+                KeyPair keys=   utils.checkpgp();
 
                 ClientSocket clientSocket = new ClientSocket();
-                ConnectView clientView = new ConnectView(clientSocket);
+                ConnectView clientView = new ConnectView(clientSocket,keys);
             }
         });
     }

@@ -11,6 +11,7 @@ package view;
         import java.awt.*;
         import java.awt.event.ActionEvent;
         import java.awt.event.ActionListener;
+        import java.security.KeyPair;
         import java.util.Objects;
 
         import controller.*;
@@ -19,9 +20,13 @@ package view;
 public class RegistrationForm {
 
     private final ClientSocket clientSocket;
+    private final KeyPair keys;
 int userid;
-    public RegistrationForm(ClientSocket clientSocket , int id) {
+
+
+    public RegistrationForm(ClientSocket clientSocket , int id,KeyPair keys ) {
         this.clientSocket = clientSocket;
+        this.keys = keys;
         this.userid= id;
         createAndShowGUI();
 
@@ -29,7 +34,10 @@ int userid;
     }
 
 
-    private  void createAndShowGUI() {
+
+
+
+        private  void createAndShowGUI() {
         JFrame frame = new JFrame("Registration");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 500);
@@ -137,7 +145,7 @@ int userid;
                        ProjectsView pro = new ProjectsView(clientSocket , response);
                    }
                    else {
-                       MarksView mar = new MarksView(clientSocket , response);
+                       MarksView mar = new MarksView(clientSocket , response , keys);
                    }
                     frame.dispose();
 

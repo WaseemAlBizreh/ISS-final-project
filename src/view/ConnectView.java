@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.security.KeyPair;
 
 public class ConnectView {
     private JFrame frame;
@@ -17,9 +18,10 @@ public class ConnectView {
     private JTextField serverPortField;
 
     private final ClientSocket clientSocket;
-
-    public ConnectView(ClientSocket clientSocket) {
+    private final KeyPair keys;
+    public ConnectView(ClientSocket clientSocket, KeyPair keys) {
         this.clientSocket = clientSocket;
+        this.keys = keys;
         buildScreen();
     }
 
@@ -47,7 +49,7 @@ public class ConnectView {
 
             }
          //   RegistrationForm m = new RegistrationForm(clientSocket);
-            Register_loginView f = new Register_loginView(clientSocket);
+            Register_loginView f = new Register_loginView(clientSocket , keys);
             frame.dispose();
             // You can perform other actions after successful connection, such as showing the next screen
             //TODO: Navigate To Next Screen

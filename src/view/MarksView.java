@@ -10,20 +10,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 
 public class MarksView {
 
     private final ClientSocket clientSocket;
+    private final KeyPair keys;
     RegistrationModel mod;
-    public MarksView(ClientSocket clientSocket , RegistrationModel mod) {
+    public MarksView(ClientSocket clientSocket , RegistrationModel mod , KeyPair keys) {
         this.clientSocket = clientSocket;
+        this.keys = keys;
         this.mod= mod;
         createAndShowGUI();
 
-
     }
-
-
 
     private  void createAndShowGUI() {
         JFrame frame = new JFrame("marks");
@@ -89,18 +91,24 @@ public class MarksView {
 
                 ClientAddProjectOrMarks v = new ClientAddProjectOrMarks(clientSocket);
                 try {
-                    int r =  v.addMaterialMarks(data);
-                    System.out.println(r);
-                    JOptionPane.showMessageDialog(frame, "The marks have been successfully added");
+                    int r =  v.addMaterialMarks(data , keys);
 
-                } catch (CustomException ex) {
+                    if (r==0)
+                    {
+                        JOptionPane.showMessageDialog(frame, "Failed to add... Please try again");
+                    }
+else {
+                        System.out.println(r);
+                        JOptionPane.showMessageDialog(frame, "The marks have been successfully added in ID " + r);
+                    }
+                } catch (CustomException | NoSuchAlgorithmException ex) {
                     ex.printStackTrace();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
                 }
 
 
-
-
-                descriptionField.setCaretPosition(0);
+                    descriptionField.setCaretPosition(0);
 
 
 

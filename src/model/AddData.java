@@ -4,7 +4,7 @@ public class AddData extends Model{
     public int id;
     public String name;
     public String content;
-
+    public String signatureBytes;
     public AddData(int id, String name, String content) {
         this.id = id;
         this.name = name;
@@ -16,6 +16,9 @@ public class AddData extends Model{
         this.content = content;
     }
 
+    public AddData() {
+
+    }
 
 
     @Override

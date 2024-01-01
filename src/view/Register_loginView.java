@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.KeyPair;
 import java.util.Objects;
 
 import controller.*;
@@ -19,10 +20,14 @@ import model.RegistrationModel;
 public class Register_loginView {
 
     private final ClientSocket clientSocket;
-
-    public Register_loginView(ClientSocket clientSocket) {
+    private final KeyPair keys;
+    public Register_loginView(ClientSocket clientSocket , KeyPair keys) {
         this.clientSocket = clientSocket;
+        this.keys = keys;
         createAndShowGUI();
+
+
+
 
 
     }
@@ -111,7 +116,7 @@ public class Register_loginView {
                                 if (Objects.equals(ss.role, "Student")) {
                                     ProjectsView pro = new ProjectsView(clientSocket, ss);
                                 } else {
-                                    MarksView mar = new MarksView(clientSocket, ss);
+                                    MarksView mar = new MarksView(clientSocket, ss , keys);
                                 }
                                 frame.dispose();
                             }
@@ -144,7 +149,7 @@ public class Register_loginView {
                             if (r == 0) {
                                 JOptionPane.showMessageDialog(frame, "The user already exists");
                             } else {
-                                RegistrationForm f = new RegistrationForm(clientSocket, r);
+                                RegistrationForm f = new RegistrationForm(clientSocket, r , keys);
                                 frame.dispose();
                             }
                         } catch (CustomException ex) {
