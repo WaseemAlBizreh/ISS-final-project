@@ -191,15 +191,14 @@ public class ServerClientHandler implements Runnable {
         }
 
         // decrypt request
-        Message decryptRequest = SessionKey.decrypt(request, sessionKey);
 
+        Message decryptRequest = SessionKey.decrypt(request, sessionKey);
         // handle Response Message
         assert decryptRequest != null;
 
+        Message message = handleClientRequests(decryptRequest);
+
         // encrypt response
-        Message message =new Message();
-        message.setMessage("تم استلام الرسالة");
-        SessionKey.encrypt(message,sessionKey);
         String response = SessionKey.encrypt(message, sessionKey);
 
         System.out.println("message after encryption: " + response);
@@ -209,7 +208,6 @@ public class ServerClientHandler implements Runnable {
     }
 
     private Message handleClientRequests(Message request) throws NoSuchAlgorithmException, CustomException {
-
         switch (request.getOperation()) {
             case None:
                 return new Message("None", Operation.None);
@@ -251,6 +249,7 @@ public class ServerClientHandler implements Runnable {
             case Project:
                 //TODO: write Project function Here
                 AddData d = (AddData) request.getBody();
+
                 int c = pm.addProject(d);
                 String idd = Integer.toString(c);
                 return new Message(idd, Operation.Project);

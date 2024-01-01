@@ -26,12 +26,9 @@ public class ClientAddProjectOrMarks {
     public int addMaterialMarks(AddData model) throws CustomException {
 
         Message request = new Message( model , Operation.Marks);
-
         Message response = clientSocket.sendMessageToServer(request, Encryption.None);
-        int id = Integer.parseInt(response.getMessage());
+        int id = 2;
         return id;
-        // System.out.println("Server: " + response);
-
     }
 
 

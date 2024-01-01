@@ -30,6 +30,7 @@ public class LoginRegisterModel extends Model {
 
     @Override
     public void parseToModel(String message) {
+
         String[] parts = message.split(" .logreg. ");
         for (String part : parts) {
             String[] keyValue = part.split(":logreg: ");

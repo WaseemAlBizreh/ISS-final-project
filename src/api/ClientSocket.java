@@ -126,9 +126,7 @@ public class ClientSocket {
             }
 
             // encrypt Message
-
             String messageEncrypt = SessionKey.encrypt(request,sessionKey.getSessionKey());
-            System.out.println("messageEncrypt:::::"+messageEncrypt);
 
             sender.writeByte(2);
             sender.flush();

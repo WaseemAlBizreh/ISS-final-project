@@ -75,6 +75,7 @@ public class Message extends Model implements Serializable {
         String[] parts = message.split(" .message. ");
         for (String part : parts) {
             String[] keyValue = part.split(":message: ");
+
             if (keyValue.length == 2) {
                 String key = keyValue[0].trim();
                 String value = keyValue[1].trim();
@@ -105,6 +106,10 @@ public class Message extends Model implements Serializable {
                 RegistrationModel registrationModel = new RegistrationModel();
                 registrationModel.parseToModel(data);
                 return registrationModel;
+            case Project:
+                AddData addData = new AddData();
+                addData.parseToModel(data);
+                return addData;
             default:
                 return null;
         }
