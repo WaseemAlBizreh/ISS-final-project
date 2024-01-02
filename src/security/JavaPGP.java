@@ -41,4 +41,42 @@ return decryptedBytes;
     }
 
 
-}}
+}
+
+
+
+    public static byte[] reverseencrypt(byte[] message, PrivateKey key) {
+        Cipher cipher = null;
+        try {
+            cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            byte[] encryptedBytes = cipher.doFinal(message);
+            System.out.println("Encrypted Text: " + new String(encryptedBytes));
+            return encryptedBytes;
+        } catch (NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+    public static byte[] reversedecrypt(byte[] message, PublicKey key) {
+        Cipher cipher = null;
+        try {
+            cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            byte[] decryptedBytes = cipher.doFinal(message);
+            System.out.println("Decrypted Text: " + new String(decryptedBytes));
+            return decryptedBytes;
+        } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+
+
+
+
+}

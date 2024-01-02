@@ -78,4 +78,38 @@ public class Utils {
         }
     }
 
+    public KeyPair caCheckPgp() {
+        try {
+            File file =new File(FilePath.desktopPath+"\\CA");
+            if (file.exists()){
+                //get public
+                GenerateKeys generateKeys= null;
+
+                generateKeys = new GenerateKeys(4096);
+
+                byte[] publicKeyBytes= generateKeys.readFromFile(FilePath.createFile("caPublicKey.txt","ca"));
+                KeyFactory kf = KeyFactory.getInstance("RSA");
+                X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
+                PublicKey publicKey = kf.generatePublic(spec);
+                //get private
+                byte[] privateKeyBytes= generateKeys.readFromFile(FilePath.createFile("caPrivateKey.txt","ca"));
+                KeyFactory kf1 = KeyFactory.getInstance("RSA");
+                PKCS8EncodedKeySpec spec1 = new PKCS8EncodedKeySpec(privateKeyBytes);
+                PrivateKey privatekey = kf1.generatePrivate(spec1);
+                return new KeyPair(publicKey,privatekey);
+
+            }else {
+                GenerateKeys generateKeys = new GenerateKeys(4096);
+                generateKeys.createKeys();
+                PublicKey publicKey = generateKeys.getPublicKey();
+                PrivateKey privateKey = generateKeys.getPrivateKey();
+                generateKeys.writeToFile(FilePath.createFile("caPublicKey.txt","ca"), publicKey.getEncoded());
+                generateKeys.writeToFile(FilePath.createFile("caPrivateKey.txt","ca"), privateKey.getEncoded());
+                return generateKeys.getPair();
+            }
+        } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
