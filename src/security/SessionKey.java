@@ -43,15 +43,10 @@ public class SessionKey {
             Message mes = new Message();
             mes.parseToModel(decryptedMessage);
             return mes;
-        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
-                IllegalBlockSizeException | BadPaddingException exception) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | SignatureException | BadPaddingException | InvalidKeySpecException exception) {
             exception.printStackTrace();
             System.out.println("Error" + exception.getMessage());
             return null;
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e);
         }
     }
 

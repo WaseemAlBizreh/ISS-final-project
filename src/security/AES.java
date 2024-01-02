@@ -45,16 +45,11 @@ public class AES {
             Message message = new Message();
             message.parseToModel(decryptedMessage);
             return message;
-        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
-                IllegalBlockSizeException | BadPaddingException e) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | SignatureException | BadPaddingException | InvalidKeySpecException e) {
             // Handle exceptions appropriately
             e.printStackTrace();
             System.out.println("Error during decryption: " + e.getMessage());
             return null;
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e);
         }
     }
 
