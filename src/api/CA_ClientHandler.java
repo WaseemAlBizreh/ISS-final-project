@@ -5,6 +5,7 @@ import controller.Client_Login_registerController;
 import controller.ServerAddProjectOrMarks;
 import controller.ServerRegistration;
 import controller.Server_login_registerController;
+import model.DigitalCertificate;
 import model.Message;
 import model.RegistrationModel;
 import security.GenerateCSR;
@@ -91,8 +92,12 @@ public class CA_ClientHandler implements Runnable {
             encryptedSubject = JavaPGP.reversedecrypt(encryptedSubject, clientKey);
             String solution = new String(encryptedSubject, StandardCharsets.UTF_8);
             if (solution.equals("2")) {
-                GenerateCSR generateCSR = new GenerateCSR();
-                generateCSR.createCSR();
+                DigitalCertificate digitalCertificate=new DigitalCertificate("I am CA",registrationModel.username,registrationModel.role,clientKey,keyPair.getPublic());
+                String sign="I am CA";
+                byte[] bytes1=JavaPGP.reverseencrypt(sign.getBytes(),keyPair.getPrivate());
+                digitalCertificate.setSignature(bytes1);
+                sender.writeObject(digitalCertificate);
+                System.out.println(digitalCertificate.toString());
             }
 
 //        catch (IOException |ClassNotFoundException e1) {

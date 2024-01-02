@@ -1,10 +1,10 @@
 package app;
 
 import constants.FilePath;
+import model.DigitalCertificate;
 import security.GenerateKeys;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -110,6 +110,37 @@ public class Utils {
         } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException e) {
             throw new RuntimeException(e);
         }
+    }
+    public static void storeObject(DigitalCertificate emp) {
+        File file =new File(FilePath.desktopPath+"\\Client");
+        OutputStream ops = null;
+        ObjectOutputStream objOps = null;
+        try {
+            ops = new FileOutputStream(FilePath.desktopPath+"\\Client\\CS.txt");
+            objOps = new ObjectOutputStream(ops);
+            objOps.writeObject(emp);
+            objOps.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static DigitalCertificate retrieveObject() throws FileNotFoundException {
+        File file =new File(FilePath.desktopPath+"\\Client\\CS.txt");
+        InputStream fileIs = null;
+        ObjectInputStream objIs = null;
+        DigitalCertificate emp = null;
+        try {
+            fileIs = new FileInputStream(FilePath.desktopPath+"\\Client\\CS.txt");
+            objIs = new ObjectInputStream(fileIs);
+            emp = (DigitalCertificate) objIs.readObject();
+        }catch (FileNotFoundException e) {
+        throw new FileNotFoundException();
+        }catch
+         (Exception e) {
+            e.printStackTrace();
+        }
+        return emp;
     }
 
 }
