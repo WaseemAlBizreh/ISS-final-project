@@ -26,14 +26,12 @@ public class EquationUI {
         this.clientSocket=clientSocket;
         this.keys=keys;
         this.sessionKey=sessionKey;
-        try {
+
             // Establish Sender
-            sender = new ObjectOutputStream(clientSocket.socket.getOutputStream());
+            sender =clientSocket.sender;
             // Establish Receiver
-            receiver = new ObjectInputStream(clientSocket.socket.getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            receiver = clientSocket.receiver;
+
         createAndShowGUI();
     }
 
