@@ -17,9 +17,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 
 public class ClientSocket {
-    private Socket socket;
-    private ObjectOutputStream sender;
-    private ObjectInputStream receiver;
+    public Socket socket;
+    public ObjectOutputStream sender;
+    public ObjectInputStream receiver;
     public static SecretKey symmetricKey;
     public PublicKey serverKey;
     public static SessionKey sessionKey;
@@ -38,7 +38,6 @@ public class ClientSocket {
         // handShaking and SessionKey
         if (handShaking())
             sendSessionKey();
-
         // let's print a message for now
         System.out.println("Connected to server at " + serverIP + ":" + serverPort);
 
@@ -181,6 +180,38 @@ public class ClientSocket {
         }
     }
 
+    public SessionKey connectToCA(String serverIP, int serverPort)throws IOException {
+        // Establish a socket connection to the server
+        socket = new Socket(serverIP, serverPort);
+
+        // Establish Sender
+        sender = new ObjectOutputStream(socket.getOutputStream());
+
+        // Establish Receiver
+        receiver = new ObjectInputStream(socket.getInputStream());
+        // handShaking and SessionKey
+        if (handShaking())
+            sendSessionKey();
+
+        // let's print a message for now
+        System.out.println("Connected to CA at " + serverIP + ":" + serverPort);
+        // createCSR();
+        return sessionKey;
+    }
+//    public boolean createCSR(){
+//        try {
+//            String usernameMessage = (String) receiver.readObject();
+//            System.out.println(SessionKey.decrypt(message,sessionKey.getSessionKey()));
+//            Message username=new Message()
+//
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } catch (ClassNotFoundException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return true;
+//    }
     // Add other methods for handling client requests or perform additional
 
 //    private String listenToServer() {

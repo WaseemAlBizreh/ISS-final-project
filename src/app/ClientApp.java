@@ -3,6 +3,7 @@ package app;
 import api.ClientSocket;
 import security.GenerateKeys;
 import view.ConnectView;
+import view.EquationUI;
 
 import javax.swing.*;
 import java.io.IOException;

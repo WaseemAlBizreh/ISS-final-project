@@ -21,6 +21,9 @@ public class Message extends Model implements Serializable {
         this.message = message;
         this.operation = operation;
     }
+    public Message(String message){
+        this.message=message;
+    }
 
     public Message(Model body, String message, Operation operation) {
         this.message = message;

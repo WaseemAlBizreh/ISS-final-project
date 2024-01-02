@@ -18,7 +18,7 @@ public class GenerateCSR {
 
 
 
-    void createCSR(){
+   public void createCSR(){
         // get KeyPair
         Utils utils = new Utils();
 
