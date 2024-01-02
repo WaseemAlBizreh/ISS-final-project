@@ -6,6 +6,7 @@ import api.ServerClientHandler;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,5 +42,6 @@ public class CA_Server {
         int port = 8090; // Specify your desired port
         CA_Server serverController = new CA_Server(port);
         serverController.startServer();
+
     }
 }

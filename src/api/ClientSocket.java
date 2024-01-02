@@ -11,6 +11,7 @@ import security.JavaPGP;
 import security.SessionKey;
 
 import javax.crypto.SecretKey;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -41,6 +42,18 @@ public class ClientSocket {
         // handShaking and SessionKey
         if (handShaking())
             sendSessionKey();
+        DigitalCertificate digitalCertificate=null;
+        try{
+        digitalCertificate=Utils.retrieveObject();}
+        catch (FileNotFoundException e){
+            System.out.println("please make a new digital certification");
+            return false;
+        }
+        if (digitalCertificate==null) {
+            System.out.println("digital certification Not Found please make a new digital certification");
+        return false;
+        }
+        sender.writeObject(digitalCertificate);
         // let's print a message for now
         System.out.println("Connected to server at " + serverIP + ":" + serverPort);
 

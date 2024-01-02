@@ -8,8 +8,9 @@ import java.security.spec.X509EncodedKeySpec;
 
 public class DigitalCertificate extends Model{
     private String subject;
+    private String role;
     private String senderName;
-    private Signature signature;
+    private byte[] signature;
     private PublicKey senderPublicKey;
     private PublicKey receiverPublicKey;
 
@@ -18,15 +19,16 @@ public class DigitalCertificate extends Model{
     public DigitalCertificate(
             String subject,
             String receiverName,
+            String role,
             PublicKey senderPublicKey,
             PublicKey receiverPublicKey
     ) {
         this.subject = subject;
         this.senderName = receiverName;
+        this.role = role;
         this.senderPublicKey = senderPublicKey;
         this.receiverPublicKey = receiverPublicKey;
     }
-
     public String getSubject() {
         return subject;
     }
@@ -43,11 +45,11 @@ public class DigitalCertificate extends Model{
         this.senderName = senderName;
     }
 
-    public Signature getSignature() {
+    public byte[] getSignature() {
         return signature;
     }
 
-    public void setSignature(Signature signature) {
+    public void setSignature(byte[] signature) {
         this.signature = signature;
     }
 
@@ -96,7 +98,7 @@ public class DigitalCertificate extends Model{
                         this.setSenderName(value);
                         break;
                     case "signature":
-                        this.setSignature(convertStringToSignature(value));
+                        this.setSignature(null);
                     case "senderPublicKey":
                         this.setSenderPublicKey(convertStringToPublicKey(value));
                     case "receiverPublicKey":
@@ -106,14 +108,14 @@ public class DigitalCertificate extends Model{
         }
     }
 
-    private Signature convertStringToSignature (String value) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature signature = Signature.getInstance("SHA256withDSA");
-        byte[] signatureBytes = value.getBytes();
-        PublicKey publicKey = this.senderPublicKey;
-        signature.initVerify(publicKey);
-        signature.update(signatureBytes);
-        return signature;
-    }
+//    private String convertStringToSignature (String value) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+//        String signature = Signature.getInstance("SHA256withDSA");
+//        byte[] signatureBytes = value.getBytes();
+//        PublicKey publicKey = this.senderPublicKey;
+//        signature.initVerify(publicKey);
+//        signature.update(signatureBytes);
+//        return signature;
+//    }
 
     private PublicKey convertStringToPublicKey (String value) throws InvalidKeySpecException, NoSuchAlgorithmException {
         byte[] encodedPublicKey = Base64.decode(value);

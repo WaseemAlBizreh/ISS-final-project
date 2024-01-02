@@ -5,10 +5,7 @@ import controller.ServerAddProjectOrMarks;
 import controller.ServerRegistration;
 import controller.Server_login_registerController;
 import exception.CustomException;
-import model.AddData;
-import model.LoginRegisterModel;
-import model.Message;
-import model.RegistrationModel;
+import model.*;
 import security.AES;
 import security.JavaPGP;
 import security.SessionKey;
@@ -23,6 +20,7 @@ import java.net.SocketException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,10 +58,24 @@ public class ServerClientHandler implements Runnable {
     @Override
     public void run() {
         //hand shaking
-
         if (handShaking() != null)
             receiveSessionKey();
-
+        try {
+            DigitalCertificate digitalCertificate=(DigitalCertificate) receiver.readObject();
+            if (digitalCertificate==null){
+                return;
+            }
+            if (clientKey.equals(digitalCertificate.getSenderPublicKey()))
+                System.out.println("authorized");
+            else{
+                System.out.println("Certification failed");
+                return;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             //handshaking
