@@ -95,26 +95,12 @@ public class CA_ClientHandler implements Runnable {
                 generateCSR.createCSR();
             }
 
-//        catch (IOException |ClassNotFoundException e1) {
-//            throw new RuntimeException(e1);
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new RuntimeException(e);
-//        } catch (GeneralSecurityException e) {
-//            throw new RuntimeException(e);
-//        }
 
 
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+
+        } catch (GeneralSecurityException | ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
         }
-
-
-
-
 
 
     }

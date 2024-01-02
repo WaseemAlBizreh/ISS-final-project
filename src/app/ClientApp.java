@@ -20,7 +20,6 @@ public class ClientApp {
             public void run() {
 
                 KeyPair keys = utils.checkPgp();
-
                 ClientSocket clientSocket = new ClientSocket();
                 ConnectView clientView = new ConnectView(clientSocket, keys);
             }

@@ -10,6 +10,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Objects;
 import javax.swing.*;
 import java.awt.*;
@@ -173,7 +176,7 @@ public class RegistrationForm {
                     MarksView mar = new MarksView(clientSocket, response, keys);
                     frame.dispose();
                 }
-            } catch (CustomException ex) {
+            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
                 ex.printStackTrace();
             }
         }

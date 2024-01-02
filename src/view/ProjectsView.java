@@ -10,6 +10,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 
 public class ProjectsView {
 
@@ -80,7 +83,7 @@ public class ProjectsView {
 
                         int r = v.addProject(data);
                         JOptionPane.showMessageDialog(frame, "The description has been successfully added");
-                    } catch (CustomException ex) {
+                    } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
                         ex.printStackTrace();
                     }
 

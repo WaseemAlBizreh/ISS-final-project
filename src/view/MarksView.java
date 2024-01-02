@@ -78,17 +78,13 @@ public class MarksView {
             public void actionPerformed(ActionEvent e) {
                 String description = descriptionField.getText();
                 String materialName = materialNameField.getText();
-
                 if (description.isEmpty() || materialName.isEmpty() )
                 {
                     JOptionPane.showMessageDialog(frame, "Please enter all the information");
-
                 }
                 else
                 {
                 AddData data =new AddData(mod.id,materialName,description);
-
-
                 ClientAddProjectOrMarks v = new ClientAddProjectOrMarks(clientSocket);
                 try {
                     int r =  v.addMaterialMarks(data , keys);
@@ -101,18 +97,10 @@ else {
                         System.out.println(r);
                         JOptionPane.showMessageDialog(frame, "The marks have been successfully added in ID " + r);
                     }
-                } catch (CustomException | NoSuchAlgorithmException ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
-                } catch (Exception exception) {
-                    exception.printStackTrace();
                 }
-
-
                     descriptionField.setCaretPosition(0);
-
-
-
-
             }}
         });
 

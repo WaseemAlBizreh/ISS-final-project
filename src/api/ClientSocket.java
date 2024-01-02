@@ -232,41 +232,5 @@ public class ClientSocket {
         // createCSR();
         return sessionKey;
     }
-//    public boolean createCSR(){
-//        try {
-//            String usernameMessage = (String) receiver.readObject();
-//            System.out.println(SessionKey.decrypt(message,sessionKey.getSessionKey()));
-//            Message username=new Message()
-//
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        }
-//        return true;
-//    }
-    // Add other methods for handling client requests or perform additional
 
-//    private String listenToServer() {
-//        try {
-//            while (true) {
-//                String message = reader.readLine();
-//                if (message == null) {
-//                    // Connection closed by the server
-//                    System.out.println("Connection closed by the server");
-//                    break;
-//                }
-//                // Handle the incoming message, e.g., display it to the user
-//                if (!message.trim().isEmpty()) {
-//                    return message;
-//                } else {
-//                    return "empty message";
-//                }
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return "empty message";
-//    }
 }
