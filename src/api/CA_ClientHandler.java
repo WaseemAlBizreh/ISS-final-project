@@ -28,7 +28,6 @@ import java.util.List;
 public class CA_ClientHandler implements Runnable {
 
 
-
     private static final List<CA_ClientHandler> clients = new ArrayList<>();
     private final Socket clientSocket;
     private final ObjectOutputStream sender;
@@ -40,7 +39,6 @@ public class CA_ClientHandler implements Runnable {
     Server_login_registerController loginSignUpController = new Server_login_registerController();
     ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
     ServerRegistration register = new ServerRegistration();
-
 
 
     public CA_ClientHandler(Socket clientSocket) {
@@ -65,41 +63,37 @@ public class CA_ClientHandler implements Runnable {
     public void run() {
 
         handShaking();
-            receiveSessionKey();
+        receiveSessionKey();
 
-//        byte [] bytes ;
-//        byte [] subjectByte ;
+        byte[] bytes;
+        byte[] subjectByte;
 
         try {
-            String username="UserName:";
-            Message message=new Message(username,Operation.None);
-            sender.writeObject(SessionKey.encrypt(message,sessionKey));
-//            String request = (String) receiver.readObject();
-//            Message clientUsername= SessionKey.decrypt(request,sessionKey);
-//
-//            String password="password:";
-//            Message message2=new Message(password);
-//            sender.writeObject(SessionKey.encrypt(message2,sessionKey));
-//            String request2 = (String) receiver.readObject();
-//            Message clientPassword= SessionKey.decrypt(request2,sessionKey);
-//
-//            Server_login_registerController server_login_registerController=new Server_login_registerController();
-//            RegistrationModel registrationModel=server_login_registerController.login(clientUsername.getMessage(),clientPassword.getMessage());
-//
-//            String equation="2x-4=0";
-//            Message equationMessage=new Message(equation);
-//            sender.writeObject(SessionKey.encrypt(equationMessage,sessionKey));
-//            byte[] encryptedSubject= (byte[]) receiver.readObject();
-//            encryptedSubject=JavaPGP.reversedecrypt(encryptedSubject,clientKey);
-//            String solution=new String(encryptedSubject,StandardCharsets.UTF_8);
-//            if (solution.equals("2")){
-//                GenerateCSR generateCSR=new GenerateCSR();
-//                generateCSR.createCSR();
-            } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            String username = "UserName:";
+            Message message = new Message(username, Operation.None);
+            sender.writeObject(SessionKey.encrypt(message, sessionKey));
+            String request = (String) receiver.readObject();
+            Message clientUsername = SessionKey.decrypt(request, sessionKey);
+
+            String password = "password:";
+            Message message2 = new Message(password, Operation.None);
+            sender.writeObject(SessionKey.encrypt(message2, sessionKey));
+            String request2 = (String) receiver.readObject();
+            Message clientPassword = SessionKey.decrypt(request2, sessionKey);
+
+            Server_login_registerController server_login_registerController = new Server_login_registerController();
+            RegistrationModel registrationModel = server_login_registerController.login(clientUsername.getMessage(), clientPassword.getMessage());
+
+            String equation = "2x-4=0";
+            Message equationMessage = new Message(equation, Operation.None);
+            sender.writeObject(SessionKey.encrypt(equationMessage, sessionKey));
+            byte[] encryptedSubject = (byte[]) receiver.readObject();
+            encryptedSubject = JavaPGP.reversedecrypt(encryptedSubject, clientKey);
+            String solution = new String(encryptedSubject, StandardCharsets.UTF_8);
+            if (solution.equals("2")) {
+                GenerateCSR generateCSR = new GenerateCSR();
+                generateCSR.createCSR();
+            }
 //        }
 //        catch (IOException |ClassNotFoundException e1) {
 //            throw new RuntimeException(e1);
@@ -110,10 +104,22 @@ public class CA_ClientHandler implements Runnable {
 //        }
 
 
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+
+
+
     }
 
-
-    private PublicKey handShaking() {
+    private PublicKey handShaking () {
         Utils utils = new Utils();
         keyPair = utils.caCheckPgp();
         try {
@@ -126,7 +132,10 @@ public class CA_ClientHandler implements Runnable {
         return clientKey;
     }
 
-    private void receiveSessionKey() {
+
+
+
+    private void receiveSessionKey () {
         SecretKey key2 = null;
         try {
             byte[] session = (byte[]) receiver.readObject();
@@ -140,5 +149,4 @@ public class CA_ClientHandler implements Runnable {
             ioException.printStackTrace();
         }
     }
-
 }
