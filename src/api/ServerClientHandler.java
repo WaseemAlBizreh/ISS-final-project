@@ -39,6 +39,7 @@ public class ServerClientHandler implements Runnable {
     ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
     ServerRegistration register = new ServerRegistration();
 
+
     public ServerClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
         clients.add(this);
@@ -89,6 +90,10 @@ public class ServerClientHandler implements Runnable {
 
                 // Receive a response from the Client
                 Object receivedData = receiver.readObject();
+                Object receiveData2=null;
+                if (typeEncryption[0]==4){
+                     receiveData2=receiver.readObject();
+                }
 
                 //TODO: add case if there new Encryption Type
                 switch (typeEncryption[0]) {
@@ -100,6 +105,9 @@ public class ServerClientHandler implements Runnable {
                         break;
                     case 2:
                         receivePGPEncryptionMessage(receivedData);
+                        break;
+                    case 3:
+                        receiveRequestAndDigitalCertificate(receivedData,receiveData2);
                         break;
                 }
             }
@@ -192,6 +200,33 @@ public class ServerClientHandler implements Runnable {
         // decrypt request
 
         Message decryptRequest = SessionKey.decrypt(request, sessionKey);
+        // handle Response Message
+        assert decryptRequest != null;
+
+        Message message = handleClientRequests(decryptRequest,clientKey);
+
+        // encrypt response
+        String response = SessionKey.encrypt(message, sessionKey);
+
+        System.out.println("message after encryption: " + response);
+        // Send the response byte array
+        sender.writeObject(response);
+        sender.flush();
+    }
+
+    private void receiveRequestAndDigitalCertificate(Object receivedData,Object receiveData2) throws Exception , CustomException{
+        String digitalCertificate = (String) receivedData;
+        String request= (String) receiveData2;
+
+        // Check Secret Key
+        if (sessionKey == null) {
+            throw new CustomException("session Key not receive");
+        }
+
+        // decrypt request
+
+        Message decryptRequest = SessionKey.decrypt(request, sessionKey);
+        Message ddd=SessionKey.decrypt(digitalCertificate,sessionKey);
         // handle Response Message
         assert decryptRequest != null;
 

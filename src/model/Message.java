@@ -3,6 +3,10 @@ package model;
 import api.Operation;
 
 import java.io.Serializable;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 public class Message extends Model implements Serializable {
     private Operation operation;
@@ -71,7 +75,7 @@ public class Message extends Model implements Serializable {
     }
 
     @Override
-    public void parseToModel(String message) {
+    public void parseToModel(String message) throws SignatureException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
         String[] parts = message.split(" .message. ");
         for (String part : parts) {
             String[] keyValue = part.split(":message: ");
@@ -94,7 +98,7 @@ public class Message extends Model implements Serializable {
         }
     }
 
-    Model detectModel(Operation operation, String data) {
+    Model detectModel(Operation operation, String data) throws InvalidKeySpecException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         //TODO: every Model should Exist here
         switch (operation){
             case Login:
@@ -110,6 +114,9 @@ public class Message extends Model implements Serializable {
                 AddData addData = new AddData();
                 addData.parseToModel(data);
                 return addData;
+            case None:
+                DigitalCertificate digitalCertificate = new DigitalCertificate();
+                digitalCertificate.parseToModel(data);
             default:
                 return null;
         }

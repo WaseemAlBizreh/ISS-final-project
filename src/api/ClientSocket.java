@@ -2,8 +2,11 @@ package api;
 
 import app.Utils;
 import exception.CustomException;
+import model.DigitalCertificate;
 import model.Message;
+import model.Model;
 import security.AES;
+import security.GenerateKeys;
 import security.JavaPGP;
 import security.SessionKey;
 
@@ -12,9 +15,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
+import java.util.List;
 
 public class ClientSocket {
     private Socket socket;
@@ -23,6 +25,7 @@ public class ClientSocket {
     public static SecretKey symmetricKey;
     public PublicKey serverKey;
     public static SessionKey sessionKey;
+
 
 
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
@@ -136,6 +139,37 @@ public class ClientSocket {
             //receiveResponse
             String responseString = (String) receiver.readObject();
             // decrypt Message
+            return SessionKey.decrypt(responseString, sessionKey.getSessionKey());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private Message sendRequestAndDigitalCertificate(Message message , Model model) throws CustomException {
+        if (sender == null) {
+            throw new CustomException("Not connected to the server");
+        }
+        try {
+            // Generate Secret Key
+            if (sessionKey == null) {
+                throw new CustomException("session key not generated");
+            }
+
+            // encrypt Message
+            Message message1 =new Message(model,Operation.None);
+            String digitalCertificate=SessionKey.encrypt(message1,sessionKey.getSessionKey());
+            String messageEncrypt = SessionKey.encrypt(message,sessionKey.getSessionKey());
+            sender.writeByte(3);
+            sender.flush();
+            sender.writeObject(digitalCertificate);
+            sender.flush();
+            sender.writeObject(messageEncrypt);
+            sender.flush();
+            //receiveResponse
+            String responseString = (String) receiver.readObject();
+            // decrypt Message
+            System.out.println(responseString);
             return SessionKey.decrypt(responseString, sessionKey.getSessionKey());
         } catch (Exception e) {
             e.printStackTrace();
