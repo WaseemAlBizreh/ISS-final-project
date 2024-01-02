@@ -7,6 +7,8 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 
@@ -49,6 +51,10 @@ public class AES {
             e.printStackTrace();
             System.out.println("Error during decryption: " + e.getMessage());
             return null;
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
         }
     }
 

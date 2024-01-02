@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 
 public class SessionKey {
 
@@ -47,6 +48,10 @@ public class SessionKey {
             exception.printStackTrace();
             System.out.println("Error" + exception.getMessage());
             return null;
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
         }
     }
 
