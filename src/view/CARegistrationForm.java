@@ -170,8 +170,23 @@ public class CARegistrationForm {
 
             //Do Registration Form Operation
             try {
-                Message message=new Message(model, Operation.SignUp);
-                sender.writeObject(SessionKey.encrypt(message,sessionKey.getSessionKey()));
+                String userId=String.valueOf(userid);
+                Message useridmessage=new Message(userId,Operation.SignUp);
+                Message usernamemessage=new Message(username,Operation.SignUp);
+                Message emailmessage=new Message(email,Operation.SignUp);
+                Message phoneNumbermessage=new Message(phoneNumber,Operation.SignUp);
+                Message mobileNumbermessage=new Message(mobileNumber,Operation.SignUp);
+                Message addressmessage=new Message(address,Operation.SignUp);
+                Message nationalNumbermessage=new Message(nationalNumber,Operation.SignUp);
+                Message rolemessage=new Message(role,Operation.SignUp);
+                sender.writeObject(SessionKey.encrypt(useridmessage,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(usernamemessage,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(emailmessage,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(phoneNumbermessage,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(mobileNumbermessage,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(addressmessage,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(nationalNumbermessage,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(rolemessage,sessionKey.getSessionKey()));
                 //RegistrationModel response = controller.Registration(model);
                 Message equation=SessionKey.decrypt((String) receiver.readObject(),sessionKey.getSessionKey());
                 if (equation.getMessage() == null) {

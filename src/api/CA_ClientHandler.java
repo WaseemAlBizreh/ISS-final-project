@@ -103,8 +103,16 @@ public class CA_ClientHandler implements Runnable {
                 String a= String.valueOf(userId);
                 Message response=new Message(a,Operation.None);
                 sender.writeObject(SessionKey.encrypt(response,sessionKey));
-                Message registeration=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
-                RegistrationModel registrationModel=register.Registration((RegistrationModel) registeration.getBody());
+                Message useridmessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                Message usernamemessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                Message emailmessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                Message phoneNumbermessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                Message mobileNumbermessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                Message addressmessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                Message nationalNumbermessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                Message rolemessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                RegistrationModel registrationModel=new RegistrationModel(Integer.parseInt(useridmessage.getMessage()),usernamemessage.getMessage(),emailmessage.getMessage(),phoneNumbermessage.getMessage(),mobileNumbermessage.getMessage(),addressmessage.getMessage(),nationalNumbermessage.getMessage(),rolemessage.getMessage());
+                RegistrationModel r= register.Registration(registrationModel);
                 String equation = "2x-4=0";
                 Message equationMessage = new Message(equation, Operation.None);
                 sender.writeObject(SessionKey.encrypt(equationMessage, sessionKey));

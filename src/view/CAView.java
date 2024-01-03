@@ -135,17 +135,11 @@ public class CAView {
             try {
                 // Do login Operation
                 // Server Will Get user From DB and return userInfo
-                Message userName = new Message();
-                userName.setMessage(username);
+                Message userName = new Message(username,Operation.Login);
                 sender.writeObject(SessionKey.encrypt(userName,sessionKey.getSessionKey()));
 
-                Message passWord= new Message();
-                passWord.setMessage(password);
+                Message passWord= new Message(password,Operation.Login);
                 sender.writeObject(SessionKey.encrypt(passWord,sessionKey.getSessionKey()));
-
-                Message opp=new Message();
-                opp.setMessage("Login");
-                sender.writeObject(SessionKey.encrypt(opp,sessionKey.getSessionKey()));
                 sender.flush();
 
 
@@ -161,30 +155,10 @@ public class CAView {
                     throw new Exception();
                 } else {
                     EquationUI equationUI = new EquationUI(decryptMessage.getMessage(),clientSocket,keys,sessionKey);
-                }
-
-                RegistrationModel userInfo = loginRegisterController.login(username, password);
-                //Check From userInfo
-                if (userInfo == null) {
-                    JOptionPane.showMessageDialog(frame, "user not found, Or username / password is incorrect",
-                            "Login Fail", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    System.out.println(userInfo.id);
-                    System.out.println(userInfo.role);
-                    if (userInfo.email == null || userInfo.phoneNumber == null) {
-                        // Navigate to Registration View to Continue User Info
-                        RegistrationForm registrationForm = new RegistrationForm(clientSocket, userInfo.id, username , keys);
-                        frame.dispose();
-                    }
-                    // Navigate to Student Projects View
-                    else if (Objects.equals(userInfo.role, "Student")) {
-                        ProjectsView pro = new ProjectsView(clientSocket, userInfo);
-                    } else {
-                        // Navigate to PhD Marks View
-                        MarksView mar = new MarksView(clientSocket, userInfo, keys);
-                    }
                     frame.dispose();
                 }
+
+
             } catch (CustomException | IOException | GeneralSecurityException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             } catch (Exception e) {
