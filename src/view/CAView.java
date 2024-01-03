@@ -1,6 +1,5 @@
 package view;
 
-import api.CA_ClientHandler;
 import api.ClientSocket;
 import api.Operation;
 import controller.Client_Login_registerController;
@@ -16,8 +15,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
+import java.security.*;
 import java.util.Objects;
 
 public class CAView {
@@ -83,18 +81,24 @@ public class CAView {
         buttonPanel.setLayout(new FlowLayout());
 
         JButton loginButton = new JButton("Login");
+        JButton registerButton = new JButton("Register");
 
         loginButton.setBackground(Color.CYAN);
+        registerButton.setBackground(Color.CYAN);
 
         loginButton.setBorder(BorderFactory.createRaisedBevelBorder());
+        registerButton.setBorder(BorderFactory.createRaisedBevelBorder());
 
 
         loginButton.setPreferredSize(new Dimension(120, 40));
+        registerButton.setPreferredSize(new Dimension(120, 40));
 
 
         loginButton.setMargin(new Insets(10, 10, 10, 10));
+        registerButton.setMargin(new Insets(10, 10, 10, 10));
 
         buttonPanel.add(loginButton);
+        buttonPanel.add(registerButton);
 
         panel.add(buttonPanel);
 
@@ -106,11 +110,17 @@ public class CAView {
             }
         });
 
-
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                signUp();
+            }
+        });
 
         frame.add(panel);
         frame.setVisible(true);
     }
+
     private void login() {
         // Set Username & Password
         String username = usernameField.getText();
@@ -122,34 +132,61 @@ public class CAView {
         } else {
             try {
                 // Do login Operation
-                Message usernameMessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey.getSessionKey());
-
-                //send username
-                Message UserName=new Message(username, Operation.None);
-                sender.writeObject(SessionKey.encrypt(UserName,sessionKey.getSessionKey()));
-
-                String passwordMessage=(String) receiver.readObject();
-                SessionKey.decrypt(passwordMessage,sessionKey.getSessionKey()).getMessage();
-
-                //send password
-                Message Password=new Message(password, Operation.None);
-                sender.writeObject(SessionKey.encrypt(Password,sessionKey.getSessionKey()));
-                Message equation=SessionKey.decrypt((String)receiver.readObject(),sessionKey.getSessionKey());
-                EquationUI equationUI=new EquationUI(equation.getMessage(),clientSocket,keys,sessionKey);
-
-
-
-
+                // Server Will Get user From DB and return userInfo
+                RegistrationModel userInfo = loginRegisterController.login(username, password);
+                //Check From userInfo
+                if (userInfo == null) {
+                    JOptionPane.showMessageDialog(frame, "user not found, Or username / password is incorrect",
+                            "Login Fail", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    System.out.println(userInfo.id);
+                    System.out.println(userInfo.role);
+                    if (userInfo.email == null || userInfo.phoneNumber == null) {
+                        // Navigate to Registration View to Continue User Info
+                        RegistrationForm registrationForm = new RegistrationForm(clientSocket, userInfo.id, username , keys);
+                        frame.dispose();
+                    }
+                    // Navigate to Student Projects View
+                    else if (Objects.equals(userInfo.role, "Student")) {
+                        ProjectsView pro = new ProjectsView(clientSocket, userInfo);
+                    } else {
+                        // Navigate to PhD Marks View
+                        MarksView mar = new MarksView(clientSocket, userInfo, keys);
+                    }
                     frame.dispose();
                 }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            } catch (GeneralSecurityException e) {
-                throw new RuntimeException(e);
+            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
+                ex.printStackTrace();
             }
-
         }
     }
+
+    private void signUp() {
+        // Set Username & Password
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
+        // Check From Username & Password
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Please enter the username and password");
+        } else {
+            try {
+                // Do SignUp Operation
+                // Create User record in DB
+                int userId = loginRegisterController.register(username, password);
+                // Check From Response
+                if (userId == 0) {
+                    JOptionPane.showMessageDialog(frame, "The user already exists",
+                            "SignUp Fail", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    // Navigate to Registration View to Continue User Info
+                    RegistrationForm registrationForm = new RegistrationForm(clientSocket, userId, username , keys);
+                    frame.dispose();
+                }
+            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+
 }

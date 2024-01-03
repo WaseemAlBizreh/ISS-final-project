@@ -29,11 +29,12 @@ public class ClientSocket {
     public static SessionKey sessionKey;
 
 
+
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
 
         // Establish a socket connection to the server
-        socket = new Socket("127.0.0.2", serverPort);
-        System.out.println(serverIP);
+        socket = new Socket(serverIP, serverPort);
+
         // Establish Sender
         sender = new ObjectOutputStream(socket.getOutputStream());
 
@@ -42,7 +43,7 @@ public class ClientSocket {
         // handShaking and SessionKey
         if (handShaking())
             sendSessionKey();
-        //sendDigitalCertificate();
+        sendDigitalCertificate();
         // let's print a message for now
         System.out.println("Connected to server at " + serverIP + ":" + serverPort);
 
@@ -97,6 +98,7 @@ public class ClientSocket {
 
             // encrypt Message
             String messageEncrypt = AES.encryptMessage(request, symmetricKey);
+
             // Send the header indicating an object
             // determine Encryption Type is AES
             sender.writeByte(1);
@@ -219,7 +221,6 @@ public class ClientSocket {
 
         // Establish a socket connection to the server
         socket = new Socket(serverIP, serverPort);
-        System.out.println(socket.getInetAddress());
 
         // Establish Sender
         sender = new ObjectOutputStream(socket.getOutputStream());
@@ -250,20 +251,18 @@ public class ClientSocket {
         }
         Message message = new Message(digitalCertificate.toString(), Operation.None);
         try {
-
-            sender.writeByte(4);
-            sender.flush();
-
-            sender.writeObject(SessionKey.encrypt(message, sessionKey.getSessionKey()));
-            sender.flush();
-
-            String mm = (String) receiver.readObject();
+            sender.writeObject(SessionKey.encrypt(message,sessionKey.getSessionKey()));
+            Message response=SessionKey.decrypt((String)receiver.readObject(),sessionKey.getSessionKey() );
+            if (!response.getMessage().equals("authorized")){
+                System.out.println("unauthorized");
+                throw new RuntimeException();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

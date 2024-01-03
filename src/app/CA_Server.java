@@ -37,7 +37,7 @@ public class CA_Server {
             while (true) {
                 // Accept client connection
                 Socket clientSocket = serverSocket.accept();
-                System.out.println(clientSocket.getInetAddress());
+
                 // Handle the client in a separate thread
                 executorService.execute(new CA_ClientHandler(clientSocket));
             }
