@@ -125,6 +125,8 @@ public class CAView {
         // Set Username & Password
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
+
+
         // Check From Username & Password
         if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(frame, "Please enter the username and password",
@@ -133,6 +135,34 @@ public class CAView {
             try {
                 // Do login Operation
                 // Server Will Get user From DB and return userInfo
+                Message userName = new Message();
+                userName.setMessage(username);
+                sender.writeObject(SessionKey.encrypt(userName,sessionKey.getSessionKey()));
+
+                Message passWord= new Message();
+                passWord.setMessage(password);
+                sender.writeObject(SessionKey.encrypt(passWord,sessionKey.getSessionKey()));
+
+                Message opp=new Message();
+                opp.setMessage("Login");
+                sender.writeObject(SessionKey.encrypt(opp,sessionKey.getSessionKey()));
+                sender.flush();
+
+
+                String rec = (String) receiver.readObject();
+
+                Message decryptMessage = SessionKey.decrypt(rec,sessionKey.getSessionKey());
+
+
+
+                if(decryptMessage.getMessage() == null) {
+                    JOptionPane.showMessageDialog(frame, "Login Fail",
+                            "Login Fail", JOptionPane.ERROR_MESSAGE);
+                    throw new Exception();
+                } else {
+                    EquationUI equationUI = new EquationUI(decryptMessage.getMessage(),clientSocket,keys,sessionKey);
+                }
+
                 RegistrationModel userInfo = loginRegisterController.login(username, password);
                 //Check From userInfo
                 if (userInfo == null) {
@@ -155,8 +185,10 @@ public class CAView {
                     }
                     frame.dispose();
                 }
-            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
+            } catch (CustomException | IOException | GeneralSecurityException | ClassNotFoundException ex) {
                 ex.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -172,6 +204,19 @@ public class CAView {
             try {
                 // Do SignUp Operation
                 // Create User record in DB
+                Message userName = new Message();
+                userName.setMessage(username);
+                sender.writeObject(SessionKey.encrypt(userName,sessionKey.getSessionKey()));
+
+                Message passWord= new Message();
+                passWord.setMessage(password);
+                sender.writeObject(SessionKey.encrypt(passWord,sessionKey.getSessionKey()));
+
+                Message opp=new Message();
+                opp.setMessage("SignUp");
+                sender.writeObject(SessionKey.encrypt(opp,sessionKey.getSessionKey()));
+                sender.flush();
+
                 int userId = loginRegisterController.register(username, password);
                 // Check From Response
                 if (userId == 0) {
@@ -184,6 +229,10 @@ public class CAView {
                 }
             } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
                 ex.printStackTrace();
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
         }
     }

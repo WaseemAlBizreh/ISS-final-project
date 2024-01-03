@@ -239,9 +239,9 @@ public class ServerClientHandler implements Runnable {
     }
 
 
-    public void receiveDigitalCertificate(Object receivedData){
+    public void receiveDigitalCertificate(){
         try {
-            String encryptedDigitalCertificate = (String) receivedData;
+            String encryptedDigitalCertificate = (String) receiver.readObject();
             Message decryptedDigitalCertificate=SessionKey.decrypt(encryptedDigitalCertificate,sessionKey);
             DigitalCertificate digitalCertificate=new DigitalCertificate() ;
             digitalCertificate.parseToModel(decryptedDigitalCertificate.getMessage());
@@ -263,6 +263,10 @@ public class ServerClientHandler implements Runnable {
                 sender.writeObject(message);
                 throw new RuntimeException();
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
