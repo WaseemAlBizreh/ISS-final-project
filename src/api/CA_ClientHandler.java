@@ -1,14 +1,12 @@
 package api;
 
 import app.Utils;
-import controller.Client_Login_registerController;
 import controller.ServerAddProjectOrMarks;
 import controller.ServerRegistration;
 import controller.Server_login_registerController;
 import model.DigitalCertificate;
 import model.Message;
 import model.RegistrationModel;
-import security.GenerateCSR;
 import security.JavaPGP;
 import security.SessionKey;
 
@@ -21,7 +19,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,9 +92,11 @@ public class CA_ClientHandler implements Runnable {
                 DigitalCertificate digitalCertificate=new DigitalCertificate("I am CA",registrationModel.username,registrationModel.role,clientKey,keyPair.getPublic());
                 String sign="I am CA";
                 byte[] bytes1=JavaPGP.reverseencrypt(sign.getBytes(),keyPair.getPrivate());
-                digitalCertificate.setSignature(bytes1);
-                sender.writeObject(digitalCertificate);
-                System.out.println(digitalCertificate.toString());
+                digitalCertificate.setSignature(new String(bytes1));
+                Message message1=new Message(digitalCertificate.toString(),Operation.None);
+
+                sender.writeObject(SessionKey.encrypt(message1,sessionKey));
+                System.out.println(digitalCertificate);
             }
 
 //        catch (IOException |ClassNotFoundException e1) {

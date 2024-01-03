@@ -6,6 +6,7 @@ import controller.ServerRegistration;
 import controller.Server_login_registerController;
 import exception.CustomException;
 import model.*;
+import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 import security.AES;
 import security.JavaPGP;
 import security.SessionKey;
@@ -17,10 +18,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.Certificate;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,22 +60,7 @@ public class ServerClientHandler implements Runnable {
         //hand shaking
         if (handShaking() != null)
             receiveSessionKey();
-        try {
-            DigitalCertificate digitalCertificate=(DigitalCertificate) receiver.readObject();
-            if (digitalCertificate==null){
-                return;
-            }
-            if (clientKey.equals(digitalCertificate.getSenderPublicKey()))
-                System.out.println("authorized");
-            else{
-                System.out.println("Certification failed");
-                return;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+
 
         try {
             //handshaking
@@ -252,7 +237,40 @@ public class ServerClientHandler implements Runnable {
         sender.writeObject(response);
         sender.flush();
     }
-
+    public void receiveDigitalCertificate(){
+        try {
+            String encryptedDigitalCertificate = (String) receiver.readObject();
+            Message decryptedDigitalCertificate=SessionKey.decrypt(encryptedDigitalCertificate,sessionKey);
+            DigitalCertificate digitalCertificate=new DigitalCertificate() ;
+            digitalCertificate.parseToModel(decryptedDigitalCertificate.getMessage());
+            if (digitalCertificate==null){
+                System.out.println("no Digital Certificate");
+                throw new RuntimeException();
+            }
+            if (clientKey.equals(digitalCertificate.getSenderPublicKey())){
+                String sign=digitalCertificate.getSignature();
+                byte[] signBytes= sign.getBytes();
+                if (digitalCertificate.getSubject().equals(new String(JavaPGP.reversedecrypt(signBytes,digitalCertificate.getSenderPublicKey()))))
+                System.out.println("authorized");
+            }
+            else{
+                System.out.println("Certification failed");
+                throw new RuntimeException();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private Message handleClientRequests(Message request, PublicKey key) throws Exception {
         switch (request.getOperation()) {
             case None:

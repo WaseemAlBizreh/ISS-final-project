@@ -42,18 +42,7 @@ public class ClientSocket {
         // handShaking and SessionKey
         if (handShaking())
             sendSessionKey();
-        DigitalCertificate digitalCertificate=null;
-        try{
-        digitalCertificate=Utils.retrieveObject();}
-        catch (FileNotFoundException e){
-            System.out.println("please make a new digital certification");
-            return false;
-        }
-        if (digitalCertificate==null) {
-            System.out.println("digital certification Not Found please make a new digital certification");
-        return false;
-        }
-        sender.writeObject(digitalCertificate);
+        sendDigitalCertificate();
         // let's print a message for now
         System.out.println("Connected to server at " + serverIP + ":" + serverPort);
 
@@ -244,6 +233,27 @@ public class ClientSocket {
         System.out.println("Connected to CA at " + serverIP + ":" + serverPort);
         // createCSR();
         return sessionKey;
+    }
+    public void sendDigitalCertificate(){
+        DigitalCertificate digitalCertificate=null;
+        try{
+            digitalCertificate=Utils.retrieveObject();}
+        catch (FileNotFoundException e){
+            System.out.println("please make a new digital certification");
+            throw new RuntimeException();
+        }
+        if (digitalCertificate==null) {
+            System.out.println("digital certification Not Found please make a new digital certification");
+            throw new RuntimeException();
+        }
+        Message message=new Message(digitalCertificate.toString(),Operation.None);
+        try {
+            sender.writeObject(SessionKey.encrypt(message,sessionKey.getSessionKey()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 //    public boolean createCSR(){
 //        try {

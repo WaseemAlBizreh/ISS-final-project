@@ -2,8 +2,8 @@ package view;
 
 import api.ClientSocket;
 import app.Utils;
-import constants.FilePath;
 import model.DigitalCertificate;
+import model.Message;
 import security.JavaPGP;
 import security.SessionKey;
 
@@ -12,8 +12,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 public class EquationUI {
     private final ObjectOutputStream sender;
@@ -64,12 +67,23 @@ public class EquationUI {
                 String clientSolution = solutionField.getText();
                 sendSolution(clientSolution);
                 try {
-                    DigitalCertificate digitalCertificate = (DigitalCertificate) receiver.readObject();
+                    String encryptedDigitalCertificate = (String) receiver.readObject();
+                    Message decryptedDigitalCertificate=SessionKey.decrypt(encryptedDigitalCertificate,sessionKey.getSessionKey());
+                    DigitalCertificate digitalCertificate=new DigitalCertificate() ;
+                    digitalCertificate.parseToModel(decryptedDigitalCertificate.getMessage());
                     Utils.storeObject(digitalCertificate);
-
+                    frame.dispose();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                } catch (InvalidKeySpecException ex) {
+                    throw new RuntimeException(ex);
+                } catch (NoSuchAlgorithmException ex) {
+                    throw new RuntimeException(ex);
+                } catch (SignatureException ex) {
+                    throw new RuntimeException(ex);
+                } catch (InvalidKeyException ex) {
                     throw new RuntimeException(ex);
                 }
             }

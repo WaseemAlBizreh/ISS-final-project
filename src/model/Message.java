@@ -12,7 +12,6 @@ public class Message extends Model implements Serializable {
     private Operation operation;
     private Model body;
     private String message;
-
     public Message() {
     }
 

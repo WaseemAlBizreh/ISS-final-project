@@ -2,11 +2,19 @@ package app;
 
 import api.CA_ClientHandler;
 import api.ServerClientHandler;
+import model.DigitalCertificate;
+import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
+import security.GenerateKeys;
+import security.JavaPGP;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Base64;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,10 +46,11 @@ public class CA_Server {
         }
     }
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, InvalidKeyException {
         int port = 8090; // Specify your desired port
         CA_Server serverController = new CA_Server(port);
         serverController.startServer();
+
 
     }
 }

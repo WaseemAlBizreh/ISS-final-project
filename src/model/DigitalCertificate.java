@@ -1,16 +1,18 @@
 package model;
 
-import org.jose4j.base64url.Base64;
+import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 
+import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 public class DigitalCertificate extends Model{
     private String subject;
     private String role;
     private String senderName;
-    private byte[] signature;
+    private String signature;
     private PublicKey senderPublicKey;
     private PublicKey receiverPublicKey;
 
@@ -45,11 +47,11 @@ public class DigitalCertificate extends Model{
         this.senderName = senderName;
     }
 
-    public byte[] getSignature() {
+    public String getSignature() {
         return signature;
     }
 
-    public void setSignature(byte[] signature) {
+    public void setSignature(String signature) {
         this.signature = signature;
     }
 
@@ -82,7 +84,6 @@ public class DigitalCertificate extends Model{
 
     @Override
     public void parseToModel(String message) throws InvalidKeySpecException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
-
         String[] parts = message.split(" .DigitalCertificate. ");
         for (String part : parts) {
             String[] keyValue = part.split(":DigitalCertificate: ");
@@ -98,11 +99,14 @@ public class DigitalCertificate extends Model{
                         this.setSenderName(value);
                         break;
                     case "signature":
-                        this.setSignature(null);
+                        this.setSignature(value);
+                        break;
                     case "senderPublicKey":
                         this.setSenderPublicKey(convertStringToPublicKey(value));
+                        break;
                     case "receiverPublicKey":
                         this.setReceiverPublicKey(convertStringToPublicKey(value));
+                        break;
                 }
             }
         }
@@ -118,9 +122,13 @@ public class DigitalCertificate extends Model{
 //    }
 
     private PublicKey convertStringToPublicKey (String value) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        byte[] encodedPublicKey = Base64.decode(value);
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(encodedPublicKey);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePublic(spec);
+        String[] publicKeyLines = value.split("\n");
+        String modulusString = publicKeyLines[2].split(": ")[1].replaceAll("\\s", "");
+        String exponentString = publicKeyLines[3].split(": ")[1].replaceAll("\\s", "");
+        byte[] modulusBytes = new BigInteger(modulusString, 10).toByteArray();
+        byte[] exponentBytes = new BigInteger(exponentString, 10).toByteArray();
+        RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(1, modulusBytes), new BigInteger(1, exponentBytes));
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        return factory.generatePublic(spec);
     }
 }

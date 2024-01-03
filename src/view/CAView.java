@@ -41,9 +41,7 @@ public class CAView {
         // Establish Sender
             sender = clientSocket.sender;
         // Establish Receiver
-            System.out.println("aaaa");
         receiver = clientSocket.receiver;
-        System.out.println("aaaaaa");
 
         createAndShowGUI();
     }
