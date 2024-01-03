@@ -27,6 +27,7 @@ public class Client_Login_registerController extends LoginRegisterController {
         //Create Login Register Model
         LoginRegisterModel model = new LoginRegisterModel(username, password);
 
+
         //Create Message to Send Information
         Message request = new Message(model, Operation.Login);
 

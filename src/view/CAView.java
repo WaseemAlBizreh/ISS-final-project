@@ -1,5 +1,6 @@
 package view;
 
+import api.CA_ClientHandler;
 import api.ClientSocket;
 import api.Operation;
 import controller.Client_Login_registerController;
@@ -122,18 +123,21 @@ public class CAView {
             try {
                 // Do login Operation
                 Message usernameMessage=SessionKey.decrypt((String) receiver.readObject(),sessionKey.getSessionKey());
-                System.out.println(usernameMessage.getMessage());
+
                 //send username
                 Message UserName=new Message(username, Operation.None);
                 sender.writeObject(SessionKey.encrypt(UserName,sessionKey.getSessionKey()));
 
                 String passwordMessage=(String) receiver.readObject();
-                System.out.println(SessionKey.decrypt(passwordMessage,sessionKey.getSessionKey()).getMessage());
+                SessionKey.decrypt(passwordMessage,sessionKey.getSessionKey()).getMessage();
+
                 //send password
                 Message Password=new Message(password, Operation.None);
                 sender.writeObject(SessionKey.encrypt(Password,sessionKey.getSessionKey()));
                 Message equation=SessionKey.decrypt((String)receiver.readObject(),sessionKey.getSessionKey());
                 EquationUI equationUI=new EquationUI(equation.getMessage(),clientSocket,keys,sessionKey);
+
+
 
 
                     frame.dispose();

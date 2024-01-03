@@ -24,6 +24,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class ServerClientHandler implements Runnable {
     private static final List<ServerClientHandler> clients = new ArrayList<>();
     private final Socket clientSocket;
@@ -43,11 +44,14 @@ public class ServerClientHandler implements Runnable {
         clients.add(this);
         System.out.println("New client is connected: " + clientSocket.getInetAddress());
         try {
+
             // Establish Sender
             sender = new ObjectOutputStream(clientSocket.getOutputStream());
 
             // Establish Receiver
+
             receiver = new ObjectInputStream(clientSocket.getInputStream());
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -57,10 +61,10 @@ public class ServerClientHandler implements Runnable {
 
     @Override
     public void run() {
+
         //hand shaking
         if (handShaking() != null)
             receiveSessionKey();
-
 
         try {
             //handshaking
@@ -84,11 +88,20 @@ public class ServerClientHandler implements Runnable {
                     System.out.println("Client disconnected: " + clientSocket.getInetAddress());
                     break;
                 }
-
                 // Receive a response from the Client
+                if(typeEncryption[0]==5){
+                    Object name=receiver.readObject();
+                    System.out.println(name.toString());
+                    Object password=receiver.readObject();
+                    System.out.println(password.toString());
+                    Object type =receiver.readObject();
+                    System.out.println(type.toString());
+
+                }
                 Object receivedData = receiver.readObject();
+
                 Object receiveData2=null;
-                if (typeEncryption[0]==4){
+                if (typeEncryption[0]==3){
                      receiveData2=receiver.readObject();
                 }
 
@@ -105,6 +118,9 @@ public class ServerClientHandler implements Runnable {
                         break;
                     case 3:
                         receiveRequestAndDigitalCertificate(receivedData,receiveData2);
+                        break;
+                    case 4:
+                        receiveDigitalCertificate(receivedData);
                         break;
                 }
             }
@@ -237,9 +253,11 @@ public class ServerClientHandler implements Runnable {
         sender.writeObject(response);
         sender.flush();
     }
-    public void receiveDigitalCertificate(){
+
+
+    public void receiveDigitalCertificate(Object receivedData){
         try {
-            String encryptedDigitalCertificate = (String) receiver.readObject();
+            String encryptedDigitalCertificate = (String) receivedData;
             Message decryptedDigitalCertificate=SessionKey.decrypt(encryptedDigitalCertificate,sessionKey);
             DigitalCertificate digitalCertificate=new DigitalCertificate() ;
             digitalCertificate.parseToModel(decryptedDigitalCertificate.getMessage());
@@ -257,10 +275,6 @@ public class ServerClientHandler implements Runnable {
                 System.out.println("Certification failed");
                 throw new RuntimeException();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
@@ -271,6 +285,8 @@ public class ServerClientHandler implements Runnable {
             throw new RuntimeException(e);
         }
     }
+
+
     private Message handleClientRequests(Message request, PublicKey key) throws Exception {
         switch (request.getOperation()) {
             case None:

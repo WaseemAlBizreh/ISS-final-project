@@ -6,7 +6,6 @@ import model.DigitalCertificate;
 import model.Message;
 import model.Model;
 import security.AES;
-import security.GenerateKeys;
 import security.JavaPGP;
 import security.SessionKey;
 
@@ -16,8 +15,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.security.*;
-import java.util.List;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 
 public class ClientSocket {
     public Socket socket;
@@ -28,12 +29,11 @@ public class ClientSocket {
     public static SessionKey sessionKey;
 
 
-
     public boolean connectToServer(String serverIP, int serverPort) throws IOException {
 
         // Establish a socket connection to the server
-        socket = new Socket(serverIP, serverPort);
-
+        socket = new Socket("127.0.0.2", serverPort);
+        System.out.println(serverIP);
         // Establish Sender
         sender = new ObjectOutputStream(socket.getOutputStream());
 
@@ -42,7 +42,7 @@ public class ClientSocket {
         // handShaking and SessionKey
         if (handShaking())
             sendSessionKey();
-        sendDigitalCertificate();
+        //sendDigitalCertificate();
         // let's print a message for now
         System.out.println("Connected to server at " + serverIP + ":" + serverPort);
 
@@ -53,8 +53,8 @@ public class ClientSocket {
         //TODO: add elseif (encryption == Encryption.TYPE) when new encryption type added
         if (encryption == Encryption.AES) {
             return sendEncryptMessage(message);
-        }else if(encryption==Encryption.DES){
-           return  sendEncryptMessagePGP(message);
+        } else if (encryption == Encryption.DES) {
+            return sendEncryptMessagePGP(message);
         } else {
             return sendNormalMessage(message);
         }
@@ -97,7 +97,6 @@ public class ClientSocket {
 
             // encrypt Message
             String messageEncrypt = AES.encryptMessage(request, symmetricKey);
-
             // Send the header indicating an object
             // determine Encryption Type is AES
             sender.writeByte(1);
@@ -130,7 +129,7 @@ public class ClientSocket {
             }
 
             // encrypt Message
-            String messageEncrypt = SessionKey.encrypt(request,sessionKey.getSessionKey());
+            String messageEncrypt = SessionKey.encrypt(request, sessionKey.getSessionKey());
 
             sender.writeByte(2);
             sender.flush();
@@ -147,7 +146,7 @@ public class ClientSocket {
         }
     }
 
-    private Message sendRequestAndDigitalCertificate(Message message , Model model) throws CustomException {
+    private Message sendRequestAndDigitalCertificate(Message message, Model model) throws CustomException {
         if (sender == null) {
             throw new CustomException("Not connected to the server");
         }
@@ -158,9 +157,9 @@ public class ClientSocket {
             }
 
             // encrypt Message
-            Message message1 =new Message(model,Operation.None);
-            String digitalCertificate=SessionKey.encrypt(message1,sessionKey.getSessionKey());
-            String messageEncrypt = SessionKey.encrypt(message,sessionKey.getSessionKey());
+            Message message1 = new Message(model, Operation.None);
+            String digitalCertificate = SessionKey.encrypt(message1, sessionKey.getSessionKey());
+            String messageEncrypt = SessionKey.encrypt(message, sessionKey.getSessionKey());
             sender.writeByte(3);
             sender.flush();
             sender.writeObject(digitalCertificate);
@@ -180,7 +179,7 @@ public class ClientSocket {
 
     private void sendSessionKey() {
         try {
-             sessionKey = new SessionKey();
+            sessionKey = new SessionKey();
             byte[] session = JavaPGP.encrypt(sessionKey.getSessionKey().getEncoded(), serverKey);
             sender.writeObject(session);
             sender.flush();
@@ -216,9 +215,11 @@ public class ClientSocket {
         }
     }
 
-    public SessionKey connectToCA(String serverIP, int serverPort)throws IOException {
+    public SessionKey connectToCA(String serverIP, int serverPort) throws IOException {
+
         // Establish a socket connection to the server
         socket = new Socket(serverIP, serverPort);
+        System.out.println(socket.getInetAddress());
 
         // Establish Sender
         sender = new ObjectOutputStream(socket.getOutputStream());
@@ -234,41 +235,36 @@ public class ClientSocket {
         // createCSR();
         return sessionKey;
     }
-    public void sendDigitalCertificate(){
-        DigitalCertificate digitalCertificate=null;
-        try{
-            digitalCertificate=Utils.retrieveObject();}
-        catch (FileNotFoundException e){
+
+    public void sendDigitalCertificate() {
+        DigitalCertificate digitalCertificate = null;
+        try {
+            digitalCertificate = Utils.retrieveObject();
+        } catch (FileNotFoundException e) {
             System.out.println("please make a new digital certification");
             throw new RuntimeException();
         }
-        if (digitalCertificate==null) {
+        if (digitalCertificate == null) {
             System.out.println("digital certification Not Found please make a new digital certification");
             throw new RuntimeException();
         }
-        Message message=new Message(digitalCertificate.toString(),Operation.None);
+        Message message = new Message(digitalCertificate.toString(), Operation.None);
         try {
-            sender.writeObject(SessionKey.encrypt(message,sessionKey.getSessionKey()));
+
+            sender.writeByte(4);
+            sender.flush();
+
+            sender.writeObject(SessionKey.encrypt(message, sessionKey.getSessionKey()));
+            sender.flush();
+
+            String mm = (String) receiver.readObject();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
-//    public boolean createCSR(){
-//        try {
-//            String usernameMessage = (String) receiver.readObject();
-//            System.out.println(SessionKey.decrypt(message,sessionKey.getSessionKey()));
-//            Message username=new Message()
-//
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        }
-//        return true;
-//    }
-    // Add other methods for handling client requests or perform additional
 
 }

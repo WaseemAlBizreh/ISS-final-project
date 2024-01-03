@@ -17,7 +17,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -25,13 +24,13 @@ import java.util.List;
 
 public class CA_ClientHandler implements Runnable {
 
-
     private static final List<CA_ClientHandler> clients = new ArrayList<>();
     private final Socket clientSocket;
-    private final ObjectOutputStream sender;
-    private final ObjectInputStream receiver;
+    private ObjectOutputStream sender;
+    private ObjectInputStream receiver;
     private static SecretKey symmetricKey;
     public PublicKey clientKey;
+    public static Socket socket;
     public static SecretKey sessionKey;
     private KeyPair keyPair;
     Server_login_registerController loginSignUpController = new Server_login_registerController();
@@ -59,57 +58,68 @@ public class CA_ClientHandler implements Runnable {
 
     @Override
     public void run() {
-
-        handShaking();
-        receiveSessionKey();
-
-        byte[] bytes;
-        byte[] subjectByte;
-
+       handShaking();
+       receiveSessionKey();
         try {
-            String username = "UserName:";
-            Message message = new Message(username, Operation.None);
-            sender.writeObject(SessionKey.encrypt(message, sessionKey));
-            String request = (String) receiver.readObject();
-            Message clientUsername = SessionKey.decrypt(request, sessionKey);
-
-            String password = "password:";
-            Message message2 = new Message(password, Operation.None);
-            sender.writeObject(SessionKey.encrypt(message2, sessionKey));
-            String request2 = (String) receiver.readObject();
-            Message clientPassword = SessionKey.decrypt(request2, sessionKey);
-
-            Server_login_registerController server_login_registerController = new Server_login_registerController();
-            RegistrationModel registrationModel = server_login_registerController.login(clientUsername.getMessage(), clientPassword.getMessage());
-
-            String equation = "2x-4=0";
-            Message equationMessage = new Message(equation, Operation.None);
-            sender.writeObject(SessionKey.encrypt(equationMessage, sessionKey));
-            byte[] encryptedSubject = (byte[]) receiver.readObject();
-            encryptedSubject = JavaPGP.reversedecrypt(encryptedSubject, clientKey);
-            String solution = new String(encryptedSubject, StandardCharsets.UTF_8);
-            if (solution.equals("2")) {
-                DigitalCertificate digitalCertificate=new DigitalCertificate("I am CA",registrationModel.username,registrationModel.role,clientKey,keyPair.getPublic());
-                String sign="I am CA";
-                byte[] bytes1=JavaPGP.reverseencrypt(sign.getBytes(),keyPair.getPrivate());
-                digitalCertificate.setSignature(new String(bytes1));
-                Message message1=new Message(digitalCertificate.toString(),Operation.None);
-
-                sender.writeObject(SessionKey.encrypt(message1,sessionKey));
-                System.out.println(digitalCertificate);
-            }
-
-
-
-
-        } catch (GeneralSecurityException | ClassNotFoundException | IOException e) {
-            throw new RuntimeException(e);
+            createDigitalCertificate();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
 
     }
 
-    private PublicKey handShaking () {
+    private void createDigitalCertificate() throws Exception {
+        String username = "UserName:";
+        Message message = new Message(username, Operation.None);
+        sender.writeObject(SessionKey.encrypt(message, sessionKey));
+        String request = (String) receiver.readObject();
+        Message clientUsername = SessionKey.decrypt(request, sessionKey);
+
+        String password = "password:";
+        Message message2 = new Message(password, Operation.None);
+        sender.writeObject(SessionKey.encrypt(message2, sessionKey));
+        String request2 = (String) receiver.readObject();
+        Message clientPassword = SessionKey.decrypt(request2, sessionKey);
+
+        Server_login_registerController server_login_registerController = new Server_login_registerController();
+        assert clientUsername != null;
+        RegistrationModel registrationModel = server_login_registerController.login(clientUsername.getMessage(), clientPassword.getMessage());
+
+        String equation = "2x-4=0";
+        Message equationMessage = new Message(equation, Operation.None);
+        sender.writeObject(SessionKey.encrypt(equationMessage, sessionKey));
+        byte[] encryptedSubject = (byte[]) receiver.readObject();
+        encryptedSubject = JavaPGP.reversedecrypt(encryptedSubject, clientKey);
+        String solution = new String(encryptedSubject, StandardCharsets.UTF_8);
+        if (solution.equals("2")) {
+            DigitalCertificate digitalCertificate = new DigitalCertificate("I am CA", registrationModel.username, registrationModel.role, clientKey, keyPair.getPublic());
+            String sign = "I am CA";
+            byte[] bytes1 = JavaPGP.reverseencrypt(sign.getBytes(), keyPair.getPrivate());
+            digitalCertificate.setSignature(new String(bytes1));
+            Message message1 = new Message(digitalCertificate.toString(), Operation.None);
+
+            sender.writeObject(SessionKey.encrypt(message1, sessionKey));
+            System.out.println(digitalCertificate);
+        }
+    }
+
+//    public static void connectToServer(String name, String password, String type) throws IOException, ClassNotFoundException {
+//        String serverIP = "127.0.0.4";
+//        int serverPort = 8080;
+//        socket = new Socket(serverIP, serverPort);
+//
+//        // Establish Sender
+
+////        sender.writeByte(5);
+////        sender.writeObject(name);
+////        sender.writeObject(password);
+////        sender.writeObject(type);
+////        sender.flush();
+//
+//       // return (RegistrationModel) receiver.readObject();
+//    }
+
+    private PublicKey handShaking() {
         Utils utils = new Utils();
         keyPair = utils.caCheckPgp();
         try {
@@ -122,10 +132,7 @@ public class CA_ClientHandler implements Runnable {
         return clientKey;
     }
 
-
-
-
-    private void receiveSessionKey () {
+    private void receiveSessionKey() {
         SecretKey key2 = null;
         try {
             byte[] session = (byte[]) receiver.readObject();
