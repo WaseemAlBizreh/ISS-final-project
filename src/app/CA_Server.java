@@ -37,7 +37,6 @@ public class CA_Server {
             while (true) {
                 // Accept client connection
                 Socket clientSocket = serverSocket.accept();
-
                 // Handle the client in a separate thread
                 executorService.execute(new CA_ClientHandler(clientSocket));
             }
@@ -50,7 +49,5 @@ public class CA_Server {
         int port = 8090; // Specify your desired port
         CA_Server serverController = new CA_Server(port);
         serverController.startServer();
-
-
     }
 }

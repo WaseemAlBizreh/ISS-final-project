@@ -249,9 +249,16 @@ public class ClientSocket {
         Message message=new Message(digitalCertificate.toString(),Operation.None);
         try {
             sender.writeObject(SessionKey.encrypt(message,sessionKey.getSessionKey()));
+            Message response=SessionKey.decrypt((String)receiver.readObject(),sessionKey.getSessionKey() );
+            if (!response.getMessage().equals("authorized")){
+                System.out.println("unauthorized");
+                throw new RuntimeException();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

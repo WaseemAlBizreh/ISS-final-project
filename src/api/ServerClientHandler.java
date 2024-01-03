@@ -60,7 +60,7 @@ public class ServerClientHandler implements Runnable {
         //hand shaking
         if (handShaking() != null)
             receiveSessionKey();
-
+        receiveDigitalCertificate();
 
         try {
             //handshaking
@@ -250,11 +250,15 @@ public class ServerClientHandler implements Runnable {
             if (clientKey.equals(digitalCertificate.getSenderPublicKey())){
                 String sign=digitalCertificate.getSignature();
                 byte[] signBytes= sign.getBytes();
-                if (digitalCertificate.getSubject().equals(new String(JavaPGP.reversedecrypt(signBytes,digitalCertificate.getSenderPublicKey()))))
+                //if (digitalCertificate.getSubject().equals(new String(JavaPGP.reversedecrypt(signBytes,digitalCertificate.getSenderPublicKey()))))
                 System.out.println("authorized");
+                Message message=new Message("authorized",Operation.None);
+                sender.writeObject(SessionKey.encrypt(message,sessionKey));
             }
             else{
                 System.out.println("Certification failed");
+                Message message=new Message("unauthorized",Operation.None);
+                sender.writeObject(message);
                 throw new RuntimeException();
             }
         } catch (IOException e) {
@@ -268,6 +272,8 @@ public class ServerClientHandler implements Runnable {
         } catch (SignatureException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         }
     }
