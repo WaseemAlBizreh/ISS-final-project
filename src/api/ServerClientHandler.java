@@ -88,7 +88,7 @@ public class ServerClientHandler implements Runnable {
                 // Receive a response from the Client
                 Object receivedData = receiver.readObject();
                 Object receiveData2=null;
-                if (typeEncryption[0]==4){
+                if (typeEncryption[0]==3){
                      receiveData2=receiver.readObject();
                 }
 
@@ -237,6 +237,8 @@ public class ServerClientHandler implements Runnable {
         sender.writeObject(response);
         sender.flush();
     }
+
+
     public void receiveDigitalCertificate(){
         try {
             String encryptedDigitalCertificate = (String) receiver.readObject();

@@ -23,7 +23,7 @@ public class ClientAddProjectOrMarks {
     public int addProject(AddData model) throws CustomException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Message request = new Message(model,Operation.Project);
         Message response = clientSocket.sendMessageToServer(request, Encryption.DES);
-        int id = 1;
+        int id = Integer.parseInt(response.getMessage());
         return id;
 
 
@@ -36,7 +36,7 @@ public class ClientAddProjectOrMarks {
         model.setSignatureBytes(Base64.encodeBase64String(signatureBytes));
         Message request = new Message( model , Operation.Marks);
         Message response = clientSocket.sendMessageToServer(request, Encryption.DES);
-        int id = 2;
+        int id = Integer.parseInt(response.getMessage());
         return id;
     }
 

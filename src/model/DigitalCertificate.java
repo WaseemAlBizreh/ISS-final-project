@@ -92,6 +92,7 @@ public class DigitalCertificate extends Model{
 
     @Override
     public void parseToModel(String message) throws InvalidKeySpecException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+
         String[] parts = message.split(" .DigitalCertificate. ");
         for (String part : parts) {
             String[] keyValue = part.split(":DigitalCertificate: ");

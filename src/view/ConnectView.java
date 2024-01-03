@@ -63,6 +63,7 @@ public class ConnectView {
 
     private void connectToCA() {
         String serverIP = serverIPField.getText();
+
         String serverPortText = serverPortField.getText();
         // Check for missing data
         if (serverIP.isEmpty() || serverPortText.isEmpty()) {
@@ -124,6 +125,7 @@ public class ConnectView {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String serverPortText = serverPortField.getText();
+
                 int serverPort = Integer.parseInt(serverPortText);
                 if (serverPort==8080)
                 connectToServer();
