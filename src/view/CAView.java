@@ -172,18 +172,29 @@ public class CAView {
             try {
                 // Do SignUp Operation
                 // Create User record in DB
-                int userId = loginRegisterController.register(username, password);
+                Message Username=new Message(username,Operation.SignUp);
+                Message Password=new Message(password,Operation.SignUp);
+                sender.writeObject(SessionKey.encrypt(Username,sessionKey.getSessionKey()));
+                sender.writeObject(SessionKey.encrypt(Password,sessionKey.getSessionKey()));
+                int userId =Integer.parseInt( SessionKey.decrypt((String) receiver.readObject(),sessionKey.getSessionKey()).getMessage()); //= loginRegisterController.register(username, password);
                 // Check From Response
                 if (userId == 0) {
                     JOptionPane.showMessageDialog(frame, "The user already exists",
                             "SignUp Fail", JOptionPane.WARNING_MESSAGE);
+                    throw new RuntimeException();
                 } else {
                     // Navigate to Registration View to Continue User Info
-                    RegistrationForm registrationForm = new RegistrationForm(clientSocket, userId, username , keys);
+                    CARegistrationForm CAregistrationForm = new CARegistrationForm(clientSocket, userId, username , keys,sessionKey);
                     frame.dispose();
                 }
-            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
+            } catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
                 ex.printStackTrace();
+            } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
     }

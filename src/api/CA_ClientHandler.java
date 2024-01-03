@@ -23,6 +23,9 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
+import static api.Operation.Login;
+import static api.Operation.SignUp;
+
 public class CA_ClientHandler implements Runnable {
 
 
@@ -67,39 +70,58 @@ public class CA_ClientHandler implements Runnable {
         byte[] subjectByte;
 
         try {
-            String username = "UserName:";
-            Message message = new Message(username, Operation.None);
-            sender.writeObject(SessionKey.encrypt(message, sessionKey));
             String request = (String) receiver.readObject();
             Message clientUsername = SessionKey.decrypt(request, sessionKey);
 
-            String password = "password:";
-            Message message2 = new Message(password, Operation.None);
-            sender.writeObject(SessionKey.encrypt(message2, sessionKey));
             String request2 = (String) receiver.readObject();
             Message clientPassword = SessionKey.decrypt(request2, sessionKey);
+            if (clientUsername.getOperation()==Login) {
+                Server_login_registerController server_login_registerController = new Server_login_registerController();
+                RegistrationModel registrationModel = server_login_registerController.login(clientUsername.getMessage(), clientPassword.getMessage());
+                String equation=null;
+                if (registrationModel!=null)
+                equation = "2x-4=0";
+                Message equationMessage = new Message(equation, Operation.None);
+                sender.writeObject(SessionKey.encrypt(equationMessage, sessionKey));
+                byte[] encryptedSubject = (byte[]) receiver.readObject();
+                encryptedSubject = JavaPGP.reversedecrypt(encryptedSubject, clientKey);
+                String solution = new String(encryptedSubject, StandardCharsets.UTF_8);
+                if (solution.equals("2")) {
+                    DigitalCertificate digitalCertificate=new DigitalCertificate("I am CA",registrationModel.username,registrationModel.role,clientKey,keyPair.getPublic());
+                    String sign="I am CA";
+                    byte[] bytes1=JavaPGP.reverseencrypt(sign.getBytes(),keyPair.getPrivate());
+                    digitalCertificate.setSignature(new String(bytes1));
+                    Message message1=new Message(digitalCertificate.toString(),Operation.None);
 
-            Server_login_registerController server_login_registerController = new Server_login_registerController();
-            RegistrationModel registrationModel = server_login_registerController.login(clientUsername.getMessage(), clientPassword.getMessage());
-
-            String equation = "2x-4=0";
-            Message equationMessage = new Message(equation, Operation.None);
-            sender.writeObject(SessionKey.encrypt(equationMessage, sessionKey));
-            byte[] encryptedSubject = (byte[]) receiver.readObject();
-            encryptedSubject = JavaPGP.reversedecrypt(encryptedSubject, clientKey);
-            String solution = new String(encryptedSubject, StandardCharsets.UTF_8);
-            if (solution.equals("2")) {
-                DigitalCertificate digitalCertificate=new DigitalCertificate("I am CA",registrationModel.username,registrationModel.role,clientKey,keyPair.getPublic());
-                String sign="I am CA";
-                byte[] bytes1=JavaPGP.reverseencrypt(sign.getBytes(),keyPair.getPrivate());
-                digitalCertificate.setSignature(new String(bytes1));
-                Message message1=new Message(digitalCertificate.toString(),Operation.None);
-
-                sender.writeObject(SessionKey.encrypt(message1,sessionKey));
-                System.out.println(digitalCertificate);
+                    sender.writeObject(SessionKey.encrypt(message1,sessionKey));
+                    System.out.println(digitalCertificate);
             }
 
+            } else if (clientUsername.getOperation()==SignUp) {
+                int userId = 0;
+                userId=loginSignUpController.register(clientUsername.getMessage(), clientPassword.getMessage());
+                String a= String.valueOf(userId);
+                Message response=new Message(a,Operation.None);
+                sender.writeObject(SessionKey.encrypt(response,sessionKey));
+                Message registeration=SessionKey.decrypt((String) receiver.readObject(),sessionKey);
+                RegistrationModel registrationModel=register.Registration((RegistrationModel) registeration.getBody());
+                String equation = "2x-4=0";
+                Message equationMessage = new Message(equation, Operation.None);
+                sender.writeObject(SessionKey.encrypt(equationMessage, sessionKey));
+                byte[] encryptedSubject = (byte[]) receiver.readObject();
+                encryptedSubject = JavaPGP.reversedecrypt(encryptedSubject, clientKey);
+                String solution = new String(encryptedSubject, StandardCharsets.UTF_8);
+                if (solution.equals("2")) {
+                    DigitalCertificate digitalCertificate=new DigitalCertificate("I am CA",registrationModel.username,registrationModel.role,clientKey,keyPair.getPublic());
+                    String sign="I am CA";
+                    byte[] bytes1=JavaPGP.reverseencrypt(sign.getBytes(),keyPair.getPrivate());
+                    digitalCertificate.setSignature(new String(bytes1));
+                    Message message1=new Message(digitalCertificate.toString(),Operation.None);
 
+                    sender.writeObject(SessionKey.encrypt(message1,sessionKey));
+                    System.out.println(digitalCertificate);
+                }
+            }
 
 
         } catch (GeneralSecurityException | ClassNotFoundException | IOException e) {

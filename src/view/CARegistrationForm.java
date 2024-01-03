@@ -2,18 +2,21 @@
 package view;
 
 import api.ClientSocket;
+import api.Operation;
 import controller.ClientRegistration;
 import exception.CustomException;
+import model.Message;
 import model.RegistrationModel;
+import security.SessionKey;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.*;
 import java.util.Objects;
 
 public class CARegistrationForm {
@@ -31,17 +34,24 @@ public class CARegistrationForm {
     private JRadioButton studentRadioButton;
     private JRadioButton teacherRadioButton;
 
-
+    private final ObjectOutputStream sender;
+    private final ObjectInputStream receiver;
     private final KeyPair keys;
 
-
-    public CARegistrationForm(ClientSocket clientSocket, int id, String username, KeyPair keys) {
+    private final SessionKey sessionKey;
+    public CARegistrationForm(ClientSocket clientSocket, int id, String username, KeyPair keys,SessionKey sessionKey) {
         this.clientSocket = clientSocket;
-
+        this.sessionKey =sessionKey;
         this.username = username;
         this.controller = new ClientRegistration(clientSocket);
         this.keys = keys;
         this.userid = id;
+
+        // Establish Sender
+        sender = clientSocket.sender;
+        // Establish Receiver
+        receiver = clientSocket.receiver;
+
         createAndShowGUI();
     }
 
@@ -160,19 +170,26 @@ public class CARegistrationForm {
 
             //Do Registration Form Operation
             try {
-                RegistrationModel response = controller.Registration(model);
-                if (response == null) {
+                Message message=new Message(model, Operation.SignUp);
+                sender.writeObject(SessionKey.encrypt(message,sessionKey.getSessionKey()));
+                //RegistrationModel response = controller.Registration(model);
+                Message equation=SessionKey.decrypt((String) receiver.readObject(),sessionKey.getSessionKey());
+                if (equation.getMessage() == null) {
                     JOptionPane.showMessageDialog(frame, "Please enter all the information",
                             "Error", JOptionPane.ERROR_MESSAGE);
-                } else if (Objects.equals(response.role, "Student")) {
-                    ProjectsView pro = new ProjectsView(clientSocket, response);
-                    frame.dispose();
+                    throw new RuntimeException();
                 } else {
-                    MarksView mar = new MarksView(clientSocket, response, keys);
-                    frame.dispose();
+                    EquationUI equationUI=new EquationUI(equation.getMessage(),clientSocket,keys,sessionKey);
+
                 }
-            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
+            } catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
                 ex.printStackTrace();
+            } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
     }
