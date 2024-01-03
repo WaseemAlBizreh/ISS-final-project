@@ -9,14 +9,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Objects;
 
 public class Register_loginView {
 
     private final ClientSocket clientSocket;
     private final KeyPair keys;
-
     private JTextField usernameField;
     private JFrame frame;
     private JPasswordField passwordField;
@@ -27,8 +29,6 @@ public class Register_loginView {
         this.keys = keys;
         loginRegisterController = new Client_Login_registerController(clientSocket);
         createAndShowGUI();
-
-
     }
 
     private void createAndShowGUI() {
@@ -142,7 +142,7 @@ public class Register_loginView {
                     }
                     frame.dispose();
                 }
-            } catch (CustomException ex) {
+            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
                 ex.printStackTrace();
             }
         }
@@ -169,7 +169,7 @@ public class Register_loginView {
                     RegistrationForm registrationForm = new RegistrationForm(clientSocket, userId, username , keys);
                     frame.dispose();
                 }
-            } catch (CustomException ex) {
+            } catch (CustomException | InvalidKeyException | NoSuchAlgorithmException | SignatureException ex) {
                 ex.printStackTrace();
             }
         }

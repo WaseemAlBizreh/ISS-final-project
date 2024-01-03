@@ -7,6 +7,10 @@ import exception.CustomException;
 import model.Message;
 import model.RegistrationModel;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+
 public class ClientRegistration {
     private final ClientSocket clientSocket;
 
@@ -14,7 +18,7 @@ public class ClientRegistration {
         this.clientSocket = clientSocket;
     }
 
-    public RegistrationModel Registration(RegistrationModel model) throws CustomException {
+    public RegistrationModel Registration(RegistrationModel model) throws CustomException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         //Create Message that hold model
         Message request = new Message(model, Operation.Register);
 

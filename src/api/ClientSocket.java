@@ -271,25 +271,4 @@ public class ClientSocket {
 //    }
     // Add other methods for handling client requests or perform additional
 
-//    private String listenToServer() {
-//        try {
-//            while (true) {
-//                String message = reader.readLine();
-//                if (message == null) {
-//                    // Connection closed by the server
-//                    System.out.println("Connection closed by the server");
-//                    break;
-//                }
-//                // Handle the incoming message, e.g., display it to the user
-//                if (!message.trim().isEmpty()) {
-//                    return message;
-//                } else {
-//                    return "empty message";
-//                }
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return "empty message";
-//    }
 }

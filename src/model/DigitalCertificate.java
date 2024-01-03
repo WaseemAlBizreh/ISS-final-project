@@ -71,6 +71,14 @@ public class DigitalCertificate extends Model{
         this.receiverPublicKey = receiverPublicKey;
     }
 
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -112,14 +120,14 @@ public class DigitalCertificate extends Model{
         }
     }
 
-//    private String convertStringToSignature (String value) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-//        String signature = Signature.getInstance("SHA256withDSA");
-//        byte[] signatureBytes = value.getBytes();
-//        PublicKey publicKey = this.senderPublicKey;
-//        signature.initVerify(publicKey);
-//        signature.update(signatureBytes);
-//        return signature;
-//    }
+    private Signature convertStringToSignature (String value) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature signature = Signature.getInstance("SHA256withDSA");
+        byte[] signatureBytes = value.getBytes();
+        PublicKey publicKey = this.senderPublicKey;
+        signature.initVerify(publicKey);
+        signature.update(signatureBytes);
+        return signature;
+    }
 
     private PublicKey convertStringToPublicKey (String value) throws InvalidKeySpecException, NoSuchAlgorithmException {
         String[] publicKeyLines = value.split("\n");

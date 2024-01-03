@@ -9,6 +9,10 @@ import model.Message;
 import model.RegistrationModel;
 import security.AES;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+
 
 public class Client_Login_registerController extends LoginRegisterController {
     String d;
@@ -19,7 +23,7 @@ public class Client_Login_registerController extends LoginRegisterController {
     }
 
     @Override
-    public RegistrationModel login(String username, String password) throws CustomException {
+    public RegistrationModel login(String username, String password) throws CustomException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         //Create Login Register Model
         LoginRegisterModel model = new LoginRegisterModel(username, password);
 
@@ -42,7 +46,7 @@ public class Client_Login_registerController extends LoginRegisterController {
     }
 
     @Override
-    public int register(String username, String password) throws CustomException {
+    public int register(String username, String password) throws CustomException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         //Create Login Register Model
         LoginRegisterModel model = new LoginRegisterModel(username, password);
         model.username = username;

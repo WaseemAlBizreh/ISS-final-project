@@ -116,6 +116,10 @@ public class Message extends Model implements Serializable {
                 AddData addData = new AddData();
                 addData.parseToModel(data);
                 return addData;
+            case Marks:
+                AddData addData1 = new AddData();
+                addData1.parseToModel(data);
+                return addData1;
             case None:
                 DigitalCertificate digitalCertificate = new DigitalCertificate();
                 digitalCertificate.parseToModel(data);
