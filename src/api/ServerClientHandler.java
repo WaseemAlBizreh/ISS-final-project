@@ -33,9 +33,11 @@ public class ServerClientHandler implements Runnable {
     public PublicKey clientKey;
     public static SecretKey sessionKey;
     private KeyPair keyPair;
+    private DigitalCertificate digitalCertificate;
     Server_login_registerController loginSignUpController = new Server_login_registerController();
     ServerAddProjectOrMarks pm = new ServerAddProjectOrMarks();
     ServerRegistration register = new ServerRegistration();
+
 
 
     public ServerClientHandler(Socket clientSocket) {
@@ -243,7 +245,7 @@ public class ServerClientHandler implements Runnable {
         try {
             String encryptedDigitalCertificate = (String) receiver.readObject();
             Message decryptedDigitalCertificate=SessionKey.decrypt(encryptedDigitalCertificate,sessionKey);
-            DigitalCertificate digitalCertificate=new DigitalCertificate() ;
+             digitalCertificate=new DigitalCertificate() ;
             digitalCertificate.parseToModel(decryptedDigitalCertificate.getMessage());
             if (digitalCertificate==null){
                 System.out.println("no Digital Certificate");
@@ -288,14 +290,20 @@ public class ServerClientHandler implements Runnable {
                 // Extract Model from Message
                 LoginRegisterModel log = (LoginRegisterModel) request.getBody();
                 // Do Login Operation
-                RegistrationModel response = loginSignUpController.login(log.username, log.password);
-                //Create Response Message
-                Message responseMessage = new Message(response, Operation.Login);
-                if (response != null) {
-                    symmetricKey = AES.generateSecretKey(log.password);
-                    responseMessage.setMessage("Login Successfully");
+                if(log.username.equals(digitalCertificate.getSenderName())) {
+
+                    RegistrationModel response = loginSignUpController.login(log.username, log.password);
+                    //Create Response Message
+                    Message responseMessage = new Message(response, Operation.Login);
+                    if (response != null) {
+                        symmetricKey = AES.generateSecretKey(log.password);
+                        responseMessage.setMessage("Login Successfully");
+                    }
+
+                    return responseMessage;
+                }else {
+
                 }
-                return responseMessage;
 
             case SignUp:
                 // Extract Model from Message
@@ -327,12 +335,12 @@ public class ServerClientHandler implements Runnable {
 
             case Marks:
                 //TODO: write Marks function Here
+                if(digitalCertificate.getRole().equals("Teacher")){
                 AddData da = (AddData) request.getBody();
                 int s = pm.addMaterialMarks(da,key);
                 String v = Integer.toString(s);
-                return new Message(v, Operation.Marks);
-
-            case SessionKey:
+                return new Message(v, Operation.Marks);}
+             case SessionKey:
                 //return controller.SessionKey()
             default:
                 return new Message("Determine Operation Type Please", Operation.None);

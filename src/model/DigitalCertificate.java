@@ -82,10 +82,12 @@ public class DigitalCertificate extends Model{
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
+
         builder.append("subject:DigitalCertificate: ").append(this.subject).append(" .DigitalCertificate. ");
-        builder.append("receiverName:DigitalCertificate: ").append(this.senderName).append(" .DigitalCertificate. ");
+        builder.append("senderName:DigitalCertificate: ").append(this.senderName).append(" .DigitalCertificate. ");
         builder.append("signature:DigitalCertificate: ").append(this.signature).append(" .DigitalCertificate. ");
         builder.append("senderPublicKey:DigitalCertificate: ").append(this.senderPublicKey).append(" .DigitalCertificate. ");
+        builder.append("role:DigitalCertificate: ").append(this.role).append(" .DigitalCertificate. ");
         builder.append("receiverPublicKey:DigitalCertificate: ").append(this.receiverPublicKey);
         return builder.toString();
     }
@@ -104,7 +106,11 @@ public class DigitalCertificate extends Model{
                     case "subject":
                         this.setSubject(value);
                         break;
-                    case "receiverName":
+                    case "role":
+                        this.setRole(value);
+
+                        break;
+                    case "senderName":
                         this.setSenderName(value);
                         break;
                     case "signature":

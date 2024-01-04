@@ -73,17 +73,7 @@ public class EquationUI {
                     digitalCertificate.parseToModel(decryptedDigitalCertificate.getMessage());
                     Utils.storeObject(digitalCertificate);
                     frame.dispose();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (ClassNotFoundException ex) {
-                    throw new RuntimeException(ex);
-                } catch (InvalidKeySpecException ex) {
-                    throw new RuntimeException(ex);
-                } catch (NoSuchAlgorithmException ex) {
-                    throw new RuntimeException(ex);
-                } catch (SignatureException ex) {
-                    throw new RuntimeException(ex);
-                } catch (InvalidKeyException ex) {
+                } catch (IOException | ClassNotFoundException | InvalidKeySpecException | NoSuchAlgorithmException | SignatureException | InvalidKeyException ex) {
                     throw new RuntimeException(ex);
                 }
             }

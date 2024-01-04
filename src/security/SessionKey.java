@@ -40,7 +40,6 @@ public class SessionKey {
             cipher.init(Cipher.DECRYPT_MODE, key);
             byte[] decryptedBytes = cipher.doFinal(Base64.decodeBase64(message));
             String decryptedMessage = new String(decryptedBytes);
-            //System.out.println(decryptedMessage+"DDDDD");
             Message mes = new Message();
             mes.parseToModel(decryptedMessage);
             return mes;
